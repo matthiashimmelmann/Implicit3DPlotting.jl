@@ -4,6 +4,10 @@ Visualizing parametrized space curves or surfaces is not complicated: We simply 
 
 Drawing inspiration from the Julia package [ImplicitPlots.jl](https://github.com/saschatimme/ImplicitPlots.jl "ImplicitPlots.jl") there is a way out from this dilemma though. Using the library [Meshing.jl](https://github.com/JuliaGeometry/Meshing.jl "Meshing.jl") immediately enables us to sample an implicit surface and form a mesh between the points that covers the surface. For implicit space curves, let us recall that if the space curve can be represented by two equations, we can simply intersect the two corresponding surfaces to obtain the space curve. For this reason, we can utilize the previously mentioned meshes and intersect them. 
 
+## Installation
+
+N/A
+
 ## Usage
 
 There are two main methods in this package: `plot_implicit_surface` and `plot_implicit_curve`. Let us first consider an example of the former:
