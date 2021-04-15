@@ -1,4 +1,4 @@
-name = "Implicit3DPlots"
+name = "Implicit3DPlotting"
 uuid = "d997a800-832a-4a4c-b340-7dddf3c1ad50"
 authors = ["Matthias Himmelmann <matthias.himmelmann@outlook.de>"]
 version = "0.1.0"

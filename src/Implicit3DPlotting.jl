@@ -1,4 +1,4 @@
-module Implicit3DPlots
+module Implicit3DPlotting
 
 export plot_implicit_surface,
        plot_implicit_surface!,
