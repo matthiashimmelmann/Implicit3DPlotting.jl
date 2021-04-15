@@ -1,4 +1,4 @@
-using Meshing, GLMakie, GeometryBasics, Polyhedra
+export plot_implicit_surface, plot_implicit_surface!, plot_implicit_curve, plot_implicit_curve!
 
 function plot_implicit_surface!(
     scene,
