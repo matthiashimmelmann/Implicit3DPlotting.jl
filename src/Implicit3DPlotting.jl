@@ -5,9 +5,9 @@ export plot_implicit_surface,
        plot_implicit_curve,
        plot_implicit_curve!
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, decompose, mesh!, Scene, cam3d!, Point, Point3f0
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point, Point3f0
 import Meshing: MarchingCubes, MarchingTetrahedra
-import GeometryBasics: Mesh, Rect, Vec
+import GeometryBasics: Mesh, Rect, Vec, decompose
 import Polyhedra: vrep, intersect, polyhedron
 
 """
@@ -48,8 +48,8 @@ function plot_implicit_surface!(
     if wireframe
         wireframe!(scene, implicit_mesh, shading=shading, color=color, transparency=transparency)
     else
-        vertices = decompose(GeometryBasics.Point{3, Float64}, implicit_mesh)
-        triangles = decompose(GeometryBasics.TriangleFace{Int}, implicit_mesh)
+        vertices = decompose(Point{3, Float64}, implicit_mesh)
+        triangles = decompose(TriangleFace{Int}, implicit_mesh)
         mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
     end
     return(scene)
