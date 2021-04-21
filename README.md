@@ -6,7 +6,10 @@ Drawing inspiration from the Julia package [ImplicitPlots.jl](https://github.com
 
 ## Installation
 
-N/A
+```
+using Pkg
+Pkg.add(url="https://github.com/matthiashimmelmann/Implicit3DPlotting.jl.git")
+```
 
 ## Usage
 
