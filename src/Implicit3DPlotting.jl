@@ -7,7 +7,7 @@ export plot_implicit_surface,
 
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0
 import Meshing: MarchingCubes, MarchingTetrahedra
-import GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
+import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
 
 """
