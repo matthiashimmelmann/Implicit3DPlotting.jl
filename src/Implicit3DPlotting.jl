@@ -33,6 +33,7 @@ function plot_implicit_surface!(
     zlims = (zmin, zmax),
     color = :steelblue,
     transparency = true,
+    samples=(35,35,35),
     shading = true,
     wireframe=false,
     MarchingModeIsCubes=true
@@ -43,7 +44,7 @@ function plot_implicit_surface!(
         throw("The specified function does not take 3 arguments.")
     end
     implicit_mesh = Mesh(f,Rect(Vec(xlims[1], ylims[1],zlims[1]),
-                            Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+                            Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
 
     if wireframe
         wireframe!(scene, implicit_mesh, shading=shading, color=color, transparency=transparency)
