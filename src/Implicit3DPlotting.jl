@@ -4,16 +4,14 @@ export plot_implicit_surface,
        plot_implicit_surface!,
        plot_implicit_curve,
        plot_implicit_curve!,
-       makieScatter!
+       GLMakiePlottingLibrary
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter
+import GLMakie as GLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
 import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
 
-function makieScatter!(scene,positions; kwargs...)
-    scatter(scene,positions; kwargs...)
-end
 
 """
 Adds an implicitly defined surface to the scene.
