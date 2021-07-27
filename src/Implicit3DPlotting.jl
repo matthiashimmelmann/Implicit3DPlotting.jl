@@ -145,14 +145,12 @@ function plot_implicit_curve!(
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
 
     lines=[]
-    for triangle_f in f_implicit_mesh
-        for triangle_g in g_implicit_mesh
-            if(min(sum((triangle_f[1]-triangle_g[1]).^2), sum((triangle_f[2]-triangle_g[2]).^2), sum((triangle_f[3]-triangle_g[3]).^2))
-                    < max(sum((triangle_f[1]-triangle_f[2]).^2), sum((triangle_f[2]-triangle_f[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2), sum((triangle_g[1]-triangle_g[2]).^2), sum((triangle_g[2]-triangle_g[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2)))
-                intersection=intersectTwoTriangles(triangle_f, triangle_g)
-                if(length(intersection)>=2)
-                    push!(lines, [Point3f0(intersection[1]), Point3f0(intersection[2])])
-                end
+    for triangle_f in f_implicit_mesh, triangle_g in g_implicit_mesh
+        if(min(sum((triangle_f[1]-triangle_g[1]).^2), sum((triangle_f[2]-triangle_g[2]).^2), sum((triangle_f[3]-triangle_g[3]).^2))
+                < max(sum((triangle_f[1]-triangle_f[2]).^2), sum((triangle_f[2]-triangle_f[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2), sum((triangle_g[1]-triangle_g[2]).^2), sum((triangle_g[2]-triangle_g[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2)))
+            intersection=intersectTwoTriangles(triangle_f, triangle_g)
+            if(length(intersection)>=2)
+                push!(lines, [Point3f0(intersection[1]), Point3f0(intersection[2])])
             end
         end
     end
@@ -170,7 +168,6 @@ function plot_implicit_curve!(
         foreach(line->linesegments!(scene, line; color=color, linewidth=linewidth, kwargs...), lines)
         try
             xlims!(scene, (xlims[1],xlims[2]))
-            ylims!(scene, (ylims[1],ylims[2]))
             zlims!(scene, (zlims[1],zlims[2]))
         catch e
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
