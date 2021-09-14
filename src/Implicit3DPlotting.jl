@@ -159,8 +159,8 @@ function plot_implicit_curve!(
     end
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
-        foreach(line->WGLMakiePlottingLibrary.linesegments!(scene, line; color=color, linewidth=3*linewidth, kwargs...), lines)
         try
+            foreach(line->WGLMakiePlottingLibrary.linesegments!(scene, line; color=color, linewidth=3*linewidth, kwargs...), lines)
             WGLMakiePlottingLibrary.xlims!(scene, (xlims[1],xlims[2]))
             WGLMakiePlottingLibrary.ylims!(scene, (ylims[1],ylims[2]))
             WGLMakiePlottingLibrary.zlims!(scene, (zlims[1],zlims[2]))
@@ -168,10 +168,11 @@ function plot_implicit_curve!(
             println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces!")
         end
     else
-        foreach(line->linesegments!(scene, line; color=color, linewidth=linewidth, kwargs...), lines)
         try
-            xlims!(scene, (xlims[1],xlims[2]))
-            zlims!(scene, (zlims[1],zlims[2]))
+            foreach(line->linesegments!(scene, line; color=color, linewidth=linewidth, kwargs...), lines)
+            GLMakiePlottingLibrary.xlims!(scene, (xlims[1],xlims[2]))
+            GLMakiePlottingLibrary.ylims!(scene, (ylims[1],ylims[2]))
+            GLMakiePlottingLibrary.zlims!(scene, (zlims[1],zlims[2]))
         catch e
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
         end
