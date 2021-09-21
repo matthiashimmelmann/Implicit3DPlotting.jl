@@ -87,7 +87,6 @@ function plot_implicit_surface(
     in_line=false,
     kwargs...
 )
-    G
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
