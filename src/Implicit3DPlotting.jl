@@ -94,7 +94,7 @@ function plot_implicit_surface(
     else
         GLMakiePlottingLibrary.activate!()
         GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
+        scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
     end
     plot_implicit_surface!(scene, f; WGLMode=WGLMode, kwargs...)
     return(scene)
@@ -196,12 +196,13 @@ function plot_implicit_curve(
         WGLMakiePlottingLibrary.activate!()
         WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
     else
         GLMakiePlottingLibrary.activate!()
         GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
+        scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
+        plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
     end
-    plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
     return(scene)
 end
 
