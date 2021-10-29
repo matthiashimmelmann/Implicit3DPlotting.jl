@@ -65,4 +65,5 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - `resolution=(800,800)`,
 - `scale_plot=false`,
 - Should the plot be displayed in-line or in an external window? `in_line=false`,
-- For curves: How thick should the linestroke be? `linewidth = 1.5`.
+- For curves: How thick should the linestroke be? `linewidth = 1.5`,
+- Other `GLMakie`-based `kwargs...` (see https://makie.juliaplots.org/stable/)
