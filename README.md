@@ -51,7 +51,7 @@ julia> plot_implicit_curve(f, g; WGLMode=true) # to use the WGLMakie backend
 
 ## Options
 
-The options that can be changed in the methods for plotting 3D curves and surfaces are given below. They should be added after the semicolon in the methods `plot_implicit_curve` or `plot_implicit_surface`, e.g. as follows: `plot_implicit_surface(f; options...)`.
+The options that can be changed in the methods for plotting 3D curves and surfaces are given below. They should be added after the semicolon in the methods `plot_implicit_curve` or `plot_implicit_surface`, e.g. as follows: `plot_implicit_surface(f; kwargs...)`.
 
 - `xlims`, `ylims` and `zlims` are vectors that determine the search domain for the meshing algorithms: `xlims = (-3,3)`,
 - `color = :steelblue`,
