@@ -17,7 +17,7 @@ There are two main methods in this package: `plot_implicit_surface` and `plot_im
 
 ```
 julia> f(x) = x[1]^2+x[2]^2-x[3]^2-1
-julia> scene = plot_implicit_surface(f; transparency=false)
+julia> scene = plot_implicit_surface(f; transparency=false, xlims=(-3,3), ylims=(-3,3), zlims=(-3,3))
 ```
 
 The result of this can be seen in the following image: 
@@ -25,9 +25,9 @@ The result of this can be seen in the following image:
   <img src="https://user-images.githubusercontent.com/65544132/114864346-2b0ec700-9df1-11eb-8ad4-4ef2d4e1c9f3.png" width="600", height="600">
 </p>
 
-Notice that the standard options are that the plot's color is `:steelblue`, the plot is transparent, the surface's shading is activated and the standard meshing method is `MarchingCubes`, because it is slightly faster than `MarchingTetrahedra`.
+Notice that the standard options are that the plot's color is `:steelblue`, the plot is transparent, the surface's shading is activated, the standard meshing method is `MarchingCubes`, because it is slightly faster than `MarchingTetrahedra`, and the standard search domain is the hypercube `[-3,3]^3` per default. All these settings can be changed in the package's methods. All possible options are listed at the end of the README file.
 
-As an example of the latter method, let us consider the input
+As an example of the `plot_implicit_curve`, let us consider the input
 
 ```
 julia> f(x)=x[1]^2+x[2]^2-x[3]^2-1
@@ -48,3 +48,21 @@ Since the 0.1.7 update, it is possible to use different Makie backends. In parti
 julia> plot_implicit_surface(f; WGLMode=false) # to use the GLMakie backend
 julia> plot_implicit_curve(f, g; WGLMode=true) # to use the WGLMakie backend
 ```
+
+## Options
+
+The options that can be changed in the methods for plotting 3D curves and surfaces are given below. They should be added after the semicolon in the methods `plot_implicit_curve` or `plot_implicit_surface`, e.g. as follows: `plot_implicit_surface(f; options...)`.
+
+- `xlims`, `ylims` and `zlims` are vectors that determine the search domain for the meshing algorithms: `xlims = (-3,3)`,
+- `color = :steelblue`,
+- For surfaces: `transparency = true`,
+- For surfaces: `shading = true`,
+- For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
+- Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
+- Web-based GL-backend (WGL) or standard Makie backend (GL)? `WGLMode = false`,
+- Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
+- Display axes? `show_axis = true`,
+- `resolution=(800,800)`,
+- `scale_plot=false`,
+- Should the plot be displayed in-line or in an external window? `in_line=false`,
+- For curves: How thick should the linestroke be? `linewidth = 1.5`.
