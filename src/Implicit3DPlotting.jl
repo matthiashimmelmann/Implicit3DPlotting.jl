@@ -4,9 +4,8 @@ export plot_implicit_surface,
        plot_implicit_surface!,
        plot_implicit_curve,
        plot_implicit_curve!,
-       GLMakiePlottingLibrary,
-       WGLMakiePlottingLibrary
-
+       GLMakiePlottingLibrary
+       
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter
 import GLMakie as GLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
