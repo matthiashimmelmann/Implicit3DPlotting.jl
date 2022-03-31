@@ -8,9 +8,9 @@ version = "1.0.1"
 
 [[AbstractPlotting]]
 deps = ["Animations", "ColorBrewer", "ColorSchemes", "ColorTypes", "Colors", "Contour", "Distributions", "DocStringExtensions", "FFMPEG", "FileIO", "FixedPointNumbers", "Formatting", "FreeType", "FreeTypeAbstraction", "GeometryBasics", "GridLayoutBase", "ImageIO", "IntervalSets", "Isoband", "KernelDensity", "LinearAlgebra", "Markdown", "Match", "Observables", "Packing", "PlotUtils", "PolygonOps", "Printf", "Random", "Serialization", "Showoff", "SignedDistanceFields", "SparseArrays", "StaticArrays", "Statistics", "StatsBase", "StructArrays", "UnicodeFun"]
-git-tree-sha1 = "938c33f24397dd91ab1734b8ac02002247bdee5a"
+git-tree-sha1 = "d778362f5f5b5a7efe4b2a7e01a34c0e08b94908"
 uuid = "537997a7-5e4e-5d89-9595-2241ea00577e"
-version = "0.18.1"
+version = "0.15.27"
 
 [[Adapt]]
 deps = ["LinearAlgebra"]
@@ -105,10 +105,10 @@ uuid = "3da002f7-5984-5a60-b8a6-cbb66c0b333f"
 version = "0.10.12"
 
 [[ColorVectorSpace]]
-deps = ["ColorTypes", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "TensorCore"]
-git-tree-sha1 = "ae479dfe260efc16034e68d62e98d013527fdc32"
+deps = ["ColorTypes", "Colors", "FixedPointNumbers", "LinearAlgebra", "SpecialFunctions", "Statistics", "StatsBase"]
+git-tree-sha1 = "4d17724e99f357bfd32afa0a9e2dda2af31a9aea"
 uuid = "c3611d14-8923-5661-9e6a-0046d554d3a4"
-version = "0.9.4"
+version = "0.8.7"
 
 [[Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
@@ -262,9 +262,9 @@ version = "0.10.18"
 
 [[FreeType]]
 deps = ["CEnum", "FreeType2_jll"]
-git-tree-sha1 = "cabd77ab6a6fdff49bfd24af2ebe76e6e018a2b4"
+git-tree-sha1 = "d5e296dea44f9cfb8cc83681aa3db367e0cbfd4f"
 uuid = "b38be410-82b0-50bf-ab77-7b57e271db43"
-version = "4.0.0"
+version = "3.0.1"
 
 [[FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Pkg", "Zlib_jll"]
@@ -274,9 +274,9 @@ version = "2.10.1+5"
 
 [[FreeTypeAbstraction]]
 deps = ["ColorVectorSpace", "Colors", "FreeType", "GeometryBasics", "StaticArrays"]
-git-tree-sha1 = "d51e69f0a2f8a3842bca4183b700cf3d9acce626"
+git-tree-sha1 = "3d955cfbefd6645ced60091d8c9bfcc96fc32345"
 uuid = "663a7486-cb36-511b-a19d-713bb74d65c9"
-version = "0.9.1"
+version = "0.8.4"
 
 [[FriBidi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -298,9 +298,9 @@ version = "3.3.4+0"
 
 [[GLMakie]]
 deps = ["AbstractPlotting", "ColorTypes", "Colors", "FileIO", "FixedPointNumbers", "FreeTypeAbstraction", "GLFW", "GeometryBasics", "LinearAlgebra", "Markdown", "MeshIO", "ModernGL", "Observables", "Printf", "Serialization", "ShaderAbstractions", "StaticArrays"]
-git-tree-sha1 = "624aed46a9f022e85e962ab67c49faf7849d8b27"
+git-tree-sha1 = "723d84fa30aa558d71b28aabecd6a145223171dc"
 uuid = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-version = "0.2.8"
+version = "0.1.30"
 
 [[GenericLinearAlgebra]]
 deps = ["LinearAlgebra", "Printf", "Random"]
@@ -349,10 +349,10 @@ uuid = "615f187c-cbe4-4ef1-ba3b-2fcf58d6d173"
 version = "0.1.0"
 
 [[ImageCore]]
-deps = ["AbstractFFTs", "ColorVectorSpace", "Colors", "FixedPointNumbers", "Graphics", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "Reexport"]
-git-tree-sha1 = "8aa4a5c9b0b0a0fea9cac59549222078e375b867"
+deps = ["AbstractFFTs", "Colors", "FixedPointNumbers", "Graphics", "MappedArrays", "MosaicViews", "OffsetArrays", "PaddedViews", "Reexport"]
+git-tree-sha1 = "db645f20b59f060d8cfae696bc9538d13fd86416"
 uuid = "a09fc81d-aa75-5fe9-8630-4744c3626534"
-version = "0.9.0"
+version = "0.8.22"
 
 [[ImageIO]]
 deps = ["FileIO", "Netpbm", "PNGFiles", "TiffImages", "UUIDs"]
@@ -601,10 +601,10 @@ uuid = "77ba4419-2d1f-58cd-9bb1-8ffee604a2e3"
 version = "0.3.5"
 
 [[Netpbm]]
-deps = ["FileIO", "ImageCore"]
-git-tree-sha1 = "18efc06f6ec36a8b801b23f076e3c6ac7c3bf153"
+deps = ["ColorVectorSpace", "FileIO", "ImageCore"]
+git-tree-sha1 = "09589171688f0039f13ebe0fdcc7288f50228b52"
 uuid = "f09324ee-3d7c-5217-9330-fc30815ba969"
-version = "1.0.2"
+version = "1.0.1"
 
 [[NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
@@ -787,9 +787,9 @@ uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
 
 [[Showoff]]
 deps = ["Dates", "Grisu"]
-git-tree-sha1 = "236dd0ddad6e3764cce8d8b09c0bbba6df2e194f"
+git-tree-sha1 = "ee010d8f103468309b8afac4abb9be2e18ff1182"
 uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
-version = "1.0.2"
+version = "0.3.2"
 
 [[SignedDistanceFields]]
 deps = ["Random", "Statistics", "Test"]
@@ -879,12 +879,6 @@ version = "1.4.2"
 [[Tar]]
 deps = ["ArgTools", "SHA"]
 uuid = "a4e569a6-e804-4fa4-b0f3-eef7a1d5b13e"
-
-[[TensorCore]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
-uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
-version = "0.1.1"
 
 [[Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
