@@ -59,7 +59,6 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: `shading = true`,
 - For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
 - Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
-- Web-based GL-backend (WGL) or standard Makie backend (GL)? `WGLMode = false`,
 - Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
 - `resolution=(800,800)`,
