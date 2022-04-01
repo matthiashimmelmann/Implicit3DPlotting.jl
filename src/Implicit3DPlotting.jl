@@ -4,10 +4,12 @@ export plot_implicit_surface,
        plot_implicit_surface!,
        plot_implicit_curve,
        plot_implicit_curve!,
-       GLMakiePlottingLibrary
-       
+       GLMakiePlottingLibrary,
+       WGLMakiePlottingLibrary
+
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter
 import GLMakie as GLMakiePlottingLibrary
+import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
 import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
@@ -38,9 +40,14 @@ function plot_implicit_surface!(
     samples=(35,35,35),
     shading = true,
     wireframe=false,
-    MarchingModeIsCubes=true
+    MarchingModeIsCubes=true,
+    WGLMode = false,
 )
-    GLMakiePlottingLibrary.activate!()
+    if WGLMode
+        WGLMakiePlottingLibrary.activate!()
+    else
+        GLMakiePlottingLibrary.activate!()
+    end
 
     try
         f([1,1,1])
@@ -50,11 +57,19 @@ function plot_implicit_surface!(
     implicit_mesh = Mesh(f,Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
     if wireframe
-        wireframe!(scene, implicit_mesh, shading=shading, color=color, transparency=transparency)
+        if WGLMode
+            WGLMakiePlottingLibrary.wireframe!(scene, implicit_mesh, shading=shading, color=color, transparency=transparency)
+        else
+            wireframe!(scene, implicit_mesh, shading=shading, color=color, transparency=transparency)
+        end
     else
         vertices = decompose(Point{3, Float64}, implicit_mesh)
         triangles = decompose(TriangleFace{Int}, implicit_mesh)
-        mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
+        if WGLMode
+            WGLMakiePlottingLibrary.mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
+        else
+            mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
+        end
     end
 
     return(scene)
@@ -68,14 +83,20 @@ function plot_implicit_surface(
     show_axis = true,
     resolution=(800,800),
     scale_plot=false,
+    WGLMode=false,
     in_line=false,
     kwargs...
 )
-
-    GLMakiePlottingLibrary.activate!()
-    GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-    scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
-    plot_implicit_surface!(scene, f; kwargs...)
+    if WGLMode
+        WGLMakiePlottingLibrary.activate!()
+        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+    else
+        GLMakiePlottingLibrary.activate!()
+        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
+    end
+    plot_implicit_surface!(scene, f; WGLMode=WGLMode, kwargs...)
     return(scene)
 end
 
@@ -105,10 +126,14 @@ function plot_implicit_curve!(
     samples=(30,30,30),
     linewidth=1.5,
     MarchingModeIsCubes=true,
+    WGLMode = false,
     kwargs...
 )
-
-    GLMakiePlottingLibrary.activate!()
+    if WGLMode
+        WGLMakiePlottingLibrary.activate!()
+    else
+        GLMakiePlottingLibrary.activate!()
+    end
 
     try
         f([1,1,1])
@@ -131,14 +156,25 @@ function plot_implicit_curve!(
             end
         end
     end
-
-    try
-        foreach(line->linesegments!(scene, line; color=color, linewidth=linewidth, kwargs...), lines)
-        GLMakiePlottingLibrary.xlims!(scene, (xlims[1],xlims[2]))
-        GLMakiePlottingLibrary.ylims!(scene, (ylims[1],ylims[2]))
-        GLMakiePlottingLibrary.zlims!(scene, (zlims[1],zlims[2]))
-    catch e
-        println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
+    if WGLMode
+        # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
+        try
+            foreach(line->WGLMakiePlottingLibrary.linesegments!(scene, line; color=color, linewidth=3*linewidth, kwargs...), lines)
+            WGLMakiePlottingLibrary.xlims!(scene, (xlims[1],xlims[2]))
+            WGLMakiePlottingLibrary.ylims!(scene, (ylims[1],ylims[2]))
+            WGLMakiePlottingLibrary.zlims!(scene, (zlims[1],zlims[2]))
+        catch e
+            println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces!")
+        end
+    else
+        try
+            foreach(line->linesegments!(scene, line; color=color, linewidth=linewidth, kwargs...), lines)
+            GLMakiePlottingLibrary.xlims!(scene, (xlims[1],xlims[2]))
+            GLMakiePlottingLibrary.ylims!(scene, (ylims[1],ylims[2]))
+            GLMakiePlottingLibrary.zlims!(scene, (zlims[1],zlims[2]))
+        catch e
+            println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
+        end
     end
     return(scene)
 end
@@ -153,12 +189,20 @@ function plot_implicit_curve(
     scale_plot=false,
     show_axis=true,
     in_line=false,
+    WGLMode=false,
     kwargs...
 )
-    GLMakiePlottingLibrary.activate!()
-    GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-    scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
-    plot_implicit_curve!(scene, f, g; kwargs...)
+    if WGLMode
+        WGLMakiePlottingLibrary.activate!()
+        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
+    else
+        GLMakiePlottingLibrary.activate!()
+        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
+        plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
+    end
     return(scene)
 end
 
