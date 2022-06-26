@@ -7,6 +7,7 @@ export plot_implicit_surface,
        GLMakiePlottingLibrary,
        WGLMakiePlottingLibrary
 
+import Makie
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
@@ -37,7 +38,7 @@ function plot_implicit_surface!(
     zlims = (zmin, zmax),
     color = :steelblue,
     transparency = true,
-    samples=(35,35,35),
+    samples=(40,40,40),
     shading = true,
     wireframe=false,
     MarchingModeIsCubes=true,
@@ -89,11 +90,11 @@ function plot_implicit_surface(
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
-        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
-        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
     end
     plot_implicit_surface!(scene, f; WGLMode=WGLMode, kwargs...)
@@ -123,7 +124,7 @@ function plot_implicit_curve!(
     ylims = (ymin, ymax),
     zlims = (zmin, zmax),
     color = :steelblue,
-    samples=(30,30,30),
+    samples=(35,35,35),
     linewidth=1.5,
     MarchingModeIsCubes=true,
     WGLMode = false,
@@ -194,12 +195,12 @@ function plot_implicit_curve(
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
-        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
         plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
     else
         GLMakiePlottingLibrary.activate!()
-        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
         plot_implicit_curve!(scene, f, g; WGLMode=WGLMode, kwargs...)
     end
