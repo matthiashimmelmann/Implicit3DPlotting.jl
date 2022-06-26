@@ -4,6 +4,7 @@ authors = ["Matthias Himmelmann <matthias.himmelmann@outlook.de>"]
 version = "0.2.3"
 
 [deps]
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Meshing = "e6723b4c-ebff-59f1-b4b7-d97aa5274f73"
 Polyhedra = "67491407-f73d-577b-9b50-8179a7c68029"
