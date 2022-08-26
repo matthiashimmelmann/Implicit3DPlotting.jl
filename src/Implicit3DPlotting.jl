@@ -15,6 +15,8 @@ import Meshing: MarchingCubes, MarchingTetrahedra
 import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
 
+#TODO: add shading contour function with colormap=:viridis,
+
 """
 Adds an implicitly defined surface to the scene.
 """
@@ -86,6 +88,7 @@ function plot_implicit_surface(
     scale_plot=false,
     WGLMode=false,
     in_line=false,
+    transparency=true,
     kwargs...
 )
     if WGLMode
@@ -97,7 +100,7 @@ function plot_implicit_surface(
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         scene = GLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=cam3d!, show_axis=show_axis)
     end
-    plot_implicit_surface!(scene, f; WGLMode=WGLMode, kwargs...)
+    plot_implicit_surface!(scene, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
     return(scene)
 end
 
