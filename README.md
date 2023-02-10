@@ -58,6 +58,7 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: `transparency = true`,
 - For surfaces: `shading = true`,
 - For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
+- For surfaces: We can choose to add a colormap on the <img src="https://render.githubusercontent.com/render/math?math=z">-axis by adding the parameter `zcolormap = :viridis` (for other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/),
 - Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
 - Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
@@ -65,4 +66,5 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - `scale_plot=false`,
 - Should the plot be displayed in-line or in an external window? `in_line=false`,
 - For curves: How thick should the linestroke be? `linewidth = 1.5`,
-- Other `GLMakie`-based `kwargs...` (see https://makie.juliaplots.org/stable/)
+- We can rescale the plot with `scaling = (x,y,z)`,
+- Other `GLMakie`-based `kwargs...` (see https://makie.juliaplots.org/stable/).
