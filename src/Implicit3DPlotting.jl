@@ -8,7 +8,7 @@ export plot_implicit_surface,
        WGLMakiePlottingLibrary
 
 import Makie
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -45,7 +45,10 @@ function plot_implicit_surface!(
     wireframe=false,
     MarchingModeIsCubes=true,
     WGLMode = false,
-)
+    zcolormap=nothing,
+    scaling=(1,1,1),
+    kwargs...
+    )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
     else
@@ -69,12 +72,23 @@ function plot_implicit_surface!(
         vertices = decompose(Point{3, Float64}, implicit_mesh)
         triangles = decompose(TriangleFace{Int}, implicit_mesh)
         if WGLMode
-            WGLMakiePlottingLibrary.mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
+            if isnothing(zcolormap)
+                WGLMakiePlottingLibrary.mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency, kwargs...)
+            else
+                colors = [v[3] for v in vertices]
+                WGLMakiePlottingLibrary.mesh!(scene, vertices, triangles, shading=shading, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
+            end
         else
-            mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency)
+            if isnothing(zcolormap)
+                mesh!(scene, vertices, triangles, shading=shading, color=color, transparency=transparency, kwargs...)
+            else
+                colors = [v[3] for v in vertices]
+                mesh!(scene, vertices, triangles, shading=shading, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
+            end        
         end
     end
 
+    scale!(scene, scaling[1], scaling[2], scaling[3])
     return(scene)
 end
 
@@ -88,7 +102,7 @@ function plot_implicit_surface(
     scale_plot=false,
     WGLMode=false,
     in_line=false,
-    transparency=true,
+    transparency=true, 
     kwargs...
 )
     if WGLMode
@@ -131,6 +145,7 @@ function plot_implicit_curve!(
     linewidth=1.5,
     MarchingModeIsCubes=true,
     WGLMode = false,
+    scaling=(1,1,1),
     kwargs...
 )
     if WGLMode
@@ -180,6 +195,8 @@ function plot_implicit_curve!(
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
         end
     end
+
+    scale!(scene, scaling[1], scaling[2], scaling[3])
     return(scene)
 end
 
