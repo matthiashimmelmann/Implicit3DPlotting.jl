@@ -58,7 +58,7 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: `transparency = true`,
 - For surfaces: `shading = true`,
 - For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
-- For surfaces: Add a color map dependent on the function's <img src="https://render.githubusercontent.com/render/math?math=z">-value by `zcolormap = :viridis` (for other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/),
+- For surfaces: Add a color map dependent on the surface's <img src="https://render.githubusercontent.com/render/math?math=z">-value by `zcolormap = :viridis` (for other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/),
 - Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
 - Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
