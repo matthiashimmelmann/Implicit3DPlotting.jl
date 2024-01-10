@@ -4,13 +4,13 @@ export plot_implicit_surface,
        plot_implicit_surface!,
        plot_implicit_curve,
        plot_implicit_curve!,
-       GLMakiePlottingLibrary,
-       WGLMakiePlottingLibrary
+       GLMakiePlottingLibrary#=,
+       WGLMakiePlottingLibrary=#
 
 import Makie
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!
 import GLMakie as GLMakiePlottingLibrary
-import WGLMakie as WGLMakiePlottingLibrary
+#import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
 import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
@@ -46,7 +46,6 @@ function plot_implicit_surface!(
     MarchingModeIsCubes=true,
     WGLMode = false,
     zcolormap=nothing,
-    scaling=(1,1,1),
     kwargs...
     )
     if WGLMode
