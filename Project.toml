@@ -1,19 +1,16 @@
 name = "Implicit3DPlotting"
 uuid = "d997a800-832a-4a4c-b340-7dddf3c1ad50"
 authors = ["Matthias Himmelmann <matthias.himmelmann@outlook.de>"]
-version = "0.2.6"
+version = "0.3.0"
 
 [deps]
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
-Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 Meshing = "e6723b4c-ebff-59f1-b4b7-d97aa5274f73"
 Polyhedra = "67491407-f73d-577b-9b50-8179a7c68029"
 WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
-Makie = "0.13"
-Meshing = "0.5"
-Polyhedra = "0.6"
-julia = "1.4"
-GLMakie = "0.3"
-WGLMakie = "0.3"
+GLMakie = "0.9"
+Meshing = "0.6"
+Polyhedra = "0.7"
+julia = "1.9"
