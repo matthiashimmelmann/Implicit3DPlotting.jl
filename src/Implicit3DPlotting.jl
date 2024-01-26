@@ -1,18 +1,19 @@
 module Implicit3DPlotting
 
-export plot_implicit_surface,
-       plot_implicit_surface!,
-       plot_implicit_curve,
-       plot_implicit_curve!,
-       GLMakiePlottingLibrary,
-       WGLMakiePlottingLibrary
-
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
 import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
 import Polyhedra: vrep, intersect, polyhedron
+
+export plot_implicit_surface,
+       plot_implicit_surface!,
+       plot_implicit_curve,
+       plot_implicit_curve!,
+#INFO: The following packages are not maintained by me. Find them here: https://github.com/MakieOrg/Makie.jl
+       GLMakiePlottingLibrary,
+       WGLMakiePlottingLibrary
 
 #TODO: add shading contour function with colormap=:viridis,
 
