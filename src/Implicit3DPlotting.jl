@@ -1,6 +1,6 @@
 module Implicit3DPlotting
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -85,8 +85,6 @@ function plot_implicit_surface!(
             end        
         end
     end
-
-    return(ax)
 end
 
 """
@@ -117,7 +115,7 @@ function plot_implicit_surface(
         end
     end
     plot_implicit_surface!(ax, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
-    return(scene)
+    return(ax)
 end
 
 """
@@ -196,8 +194,6 @@ function plot_implicit_curve!(
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
         end
     end
-
-    return(ax)
 end
 
 """
@@ -229,7 +225,7 @@ function plot_implicit_curve(
     end
     plot_implicit_curve!(ax, f, g; WGLMode=WGLMode, kwargs...)
 
-    return(scene)
+    return(ax)
 end
 
 """
