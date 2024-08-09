@@ -1,5 +1,16 @@
 module Implicit3DPlotting
 
+#=
+    This is a package for plotting implicitly defined space curves and surfaces. It plots the objects in a single window
+    `GLMakie.Figure` and `WGLMakie.Scene` are used for this. If multiple simultaneous windows are necessary, we recommend
+    either using the web-based openGL backend in Jupyter notebooks. If that does not work, you can ask for this feature; 
+    it did not seem necessary up until now.
+
+    author:     Matthias Himmelmann
+    email:      matthias.himmelmann (at) outlook.de
+    website:    matthiashimmelmann.github.io/
+=#
+
 import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
@@ -21,7 +32,7 @@ export plot_implicit_surface,
 Adds an implicitly defined surface to the scene.
 """
 function plot_implicit_surface!(
-    ax,
+    fig::Union{GLMakiePlottingLibrary.Figure,WGLMakiePlottingLibrary.Scene},
     f;
     x_min = -3.0,
     xmin = x_min,
@@ -60,6 +71,8 @@ function plot_implicit_surface!(
     end
     implicit_mesh = Mesh(f,Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+    ax = fig[1,1]
+
     if wireframe
         if WGLMode
             WGLMakiePlottingLibrary.wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
@@ -103,26 +116,26 @@ function plot_implicit_surface(
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = GLMakiePlottingLibrary.Figure(size=resolution)
-        ax = GLMakiePlottingLibrary.Axis3(scene[1,1], aspect = aspect)
+        fig = GLMakiePlottingLibrary.Figure(size=resolution)
+        ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect)
         if !show_axis
             GLMakiePlottingLibrary.hidespines!(ax)
             GLMakiePlottingLibrary.hidedecorations!(ax)
         end
     end
-    plot_implicit_surface!(ax, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
-    return(ax)
+    plot_implicit_surface!(fig, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
+    return(fig)
 end
 
 """
 Adds a space curve, implicitly defined by two equations, to a scene.
 """
 function plot_implicit_curve!(
-    ax,
+    fig::Union{GLMakiePlottingLibrary.Figure,WGLMakiePlottingLibrary.Scene},
     f,
     g;
     x_min = -2.0,
@@ -174,6 +187,8 @@ function plot_implicit_curve!(
             end
         end
     end
+
+    ax = fig[1,1]
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
         try
@@ -212,20 +227,19 @@ function plot_implicit_curve(
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        scene = GLMakiePlottingLibrary.Figure(size=resolution)
+        fig = GLMakiePlottingLibrary.Figure(size=resolution)
         ax = GLMakiePlottingLibrary.Axis3(figure[1,1], aspect = aspect)
         if !show_axis
             GLMakiePlottingLibrary.hidespines!(ax)
             GLMakiePlottingLibrary.hidedecorations!(ax)
         end
     end
-    plot_implicit_curve!(ax, f, g; WGLMode=WGLMode, kwargs...)
-
-    return(ax)
+    plot_implicit_curve!(fig, f, g; WGLMode=WGLMode, kwargs...)
+    return(fig)
 end
 
 """
