@@ -28,11 +28,9 @@ export plot_implicit_surface,
 
 #TODO: add shading contour function with colormap=:viridis,
 
-"""
-Adds an implicitly defined surface to the scene.
-"""
+
 function plot_implicit_surface!(
-    fig::Union{GLMakiePlottingLibrary.Figure,WGLMakiePlottingLibrary.Scene},
+    fig::GLMakiePlottingLibrary.Figure,
     f;
     x_min = -3.0,
     xmin = x_min,
@@ -75,7 +73,7 @@ function plot_implicit_surface!(
 
     if wireframe
         if WGLMode
-            WGLMakiePlottingLibrary.wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
+            wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
         else
             wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
         end
@@ -84,10 +82,10 @@ function plot_implicit_surface!(
         triangles = decompose(TriangleFace{Int}, implicit_mesh)
         if WGLMode
             if isnothing(zcolormap)
-                WGLMakiePlottingLibrary.mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
+                mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
             else
                 colors = [v[3] for v in vertices]
-                WGLMakiePlottingLibrary.mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
+                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
             end
         else
             if isnothing(zcolormap)
@@ -100,9 +98,9 @@ function plot_implicit_surface!(
     end
 end
 
-"""
+#=
 Plots an implicitly defined surface.
-"""
+=#
 function plot_implicit_surface(
     f;
     show_axis = true,
@@ -115,12 +113,11 @@ function plot_implicit_surface(
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
-        #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
-        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        fig = GLMakiePlottingLibrary.Figure(size=resolution)
+        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        global fig = GLMakiePlottingLibrary.Figure(size=resolution)
         ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect)
         if !show_axis
             GLMakiePlottingLibrary.hidespines!(ax)
@@ -135,7 +132,7 @@ end
 Adds a space curve, implicitly defined by two equations, to a scene.
 """
 function plot_implicit_curve!(
-    fig::Union{GLMakiePlottingLibrary.Figure,WGLMakiePlottingLibrary.Scene},
+    fig::GLMakiePlottingLibrary.Figure,
     f,
     g;
     x_min = -2.0,
@@ -226,13 +223,13 @@ function plot_implicit_curve(
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
-        #WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
-        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        ax = GLMakiePlottingLibrary.Axis3(figure[1,1], aspect = aspect)
+        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        global fig = GLMakiePlottingLibrary.Figure(size=resolution)
+        ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect)
         if !show_axis
             GLMakiePlottingLibrary.hidespines!(ax)
             GLMakiePlottingLibrary.hidedecorations!(ax)
