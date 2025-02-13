@@ -116,7 +116,7 @@ function plot_implicit_surface(
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
-        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
         ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect)
         if !show_axis
@@ -227,7 +227,7 @@ function plot_implicit_curve(
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
-        GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
+        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
         ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect)
         if !show_axis
