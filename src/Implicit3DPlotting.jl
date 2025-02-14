@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot, lines!
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -153,8 +153,9 @@ function plot_implicit_curve!(
     color = :steelblue,
     samples=(30,30,30),
     linewidth=1.5,
-    MarchingModeIsCubes=true,
+    MarchingModeIsCubes = true,
     WGLMode = false,
+    transparency = true,
     kwargs...
 )
     if WGLMode
@@ -186,24 +187,34 @@ function plot_implicit_curve!(
     end
 
     ax = fig[1,1]
+
+    lines = vcat(lines...)
+    i=1
+    atol_val = sqrt((xlims[2]-xlims[1])^2+(ylims[2]-ylims[1])^2+(zlims[2]-zlims[1])^2)/1000
+    while i<length(lines)
+        if isapprox(lines[i], lines[i+1], atol=atol_val)
+            deleteat(lines, i+1)
+        end
+    end
+
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
         try
-            foreach(line->WGLMakiePlottingLibrary.linesegments!(ax, line; color=color, linewidth=3*linewidth, kwargs...), lines)
+            WGLMakiePlottingLibrary.lines!(ax, vcat(lines...); transparency=transparency, color=color, linewidth=3*linewidth, kwargs...)
             WGLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             WGLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             WGLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
         catch e
-            println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces!")
+            println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
         end
     else
         try
-            foreach(line->linesegments!(ax, line; color=color, linewidth=linewidth, kwargs...), lines)
+            lines!(ax, vcat(lines...); color=color, transparency=transparency, linewidth=linewidth, kwargs...)
             GLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             GLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             GLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
         catch e
-            println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces!")
+            println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
         end
     end
 end
