@@ -200,7 +200,7 @@ function plot_implicit_curve!(
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
         try
-            WGLMakiePlottingLibrary.lines!(ax, vcat(lines...); transparency=transparency, color=color, linewidth=3*linewidth, kwargs...)
+            WGLMakiePlottingLibrary.lines!(ax, lines; transparency=transparency, color=color, linewidth=3*linewidth, kwargs...)
             WGLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             WGLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             WGLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
@@ -209,7 +209,7 @@ function plot_implicit_curve!(
         end
     else
         try
-            lines!(ax, vcat(lines...); color=color, transparency=transparency, linewidth=linewidth, kwargs...)
+            lines!(ax, lines; color=color, transparency=transparency, linewidth=linewidth, kwargs...)
             GLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             GLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             GLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
