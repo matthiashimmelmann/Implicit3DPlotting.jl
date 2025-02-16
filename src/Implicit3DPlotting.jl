@@ -193,7 +193,7 @@ function plot_implicit_curve!(
     atol_val = sqrt((xlims[2]-xlims[1])^2+(ylims[2]-ylims[1])^2+(zlims[2]-zlims[1])^2)/1000
     while i<length(lines)
         if isapprox(lines[i], lines[i+1], atol=atol_val)
-            deleteat(lines, i+1)
+            deleteat!(lines, i+1)
         end
         i=i+1
     end
