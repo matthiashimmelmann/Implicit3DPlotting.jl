@@ -195,6 +195,7 @@ function plot_implicit_curve!(
         if isapprox(lines[i], lines[i+1], atol=atol_val)
             deleteat(lines, i+1)
         end
+        i=i+1
     end
 
     if WGLMode
