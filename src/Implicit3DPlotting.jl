@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot, lines!
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -188,20 +188,10 @@ function plot_implicit_curve!(
 
     ax = fig[1,1]
 
-    lines = vcat(lines...)
-    i=1
-    atol_val = sqrt((xlims[2]-xlims[1])^2+(ylims[2]-ylims[1])^2+(zlims[2]-zlims[1])^2)/1000
-    while i<length(lines)
-        if isapprox(lines[i], lines[i+1], atol=atol_val)
-            deleteat!(lines, i+1)
-        end
-        i=i+1
-    end
-
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
         try
-            WGLMakiePlottingLibrary.lines!(ax, lines; transparency=transparency, color=color, linewidth=3*linewidth, kwargs...)
+            foreach(line->WGLMakiePlottingLibrary.linesegments!(ax, line; transparency=transparency, color=color, linewidth=3*linewidth, kwargs...), lines)
             WGLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             WGLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             WGLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
@@ -210,7 +200,7 @@ function plot_implicit_curve!(
         end
     else
         try
-            lines!(ax, lines; color=color, transparency=transparency, linewidth=linewidth, kwargs...)
+            foreach(line->linesegments!(ax, line; color=color, transparency=transparency, linewidth=linewidth, kwargs...), lines)
             GLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
             GLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
             GLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
