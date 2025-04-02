@@ -15,7 +15,7 @@ import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene,
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
-import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point
+import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point, SimpleFaceView
 import Polyhedra: vrep, intersect, polyhedron
 
 export plot_implicit_surface,
@@ -26,34 +26,27 @@ export plot_implicit_surface,
        GLMakiePlottingLibrary,
        WGLMakiePlottingLibrary
 
-#TODO: add shading contour function with colormap=:viridis,
-
 
 function plot_implicit_surface!(
     fig::GLMakiePlottingLibrary.Figure,
-    f;
+    f::Function;
     x_min = -3.0,
-    xmin = x_min,
     x_max = 3.0,
-    xmax = x_max,
-    y_min = xmin,
-    ymin = y_min,
-    y_max = xmax,
-    ymax = y_max,
-    z_min = xmin,
-    zmin = z_min,
-    z_max = xmax,
-    zmax = z_max,
-    xlims = (xmin, xmax),
-    ylims = (ymin, ymax),
-    zlims = (zmin, zmax),
-    color = :steelblue,
-    transparency = true,
-    samples=(35,35,35),
-    wireframe=false,
-    MarchingModeIsCubes=true,
-    WGLMode = false,
+    y_min = x_min,
+    y_max = x_max,
+    z_min = x_min,
+    z_max = x_max,
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
+    color::Symbol = :steelblue,
+    transparency::Bool = true,
+    samples::Tuple{Int,Int,Int}=(35,35,35),
+    wireframe::Bool=false,
+    MarchingModeIsCubes::Bool=true,
+    WGLMode::Bool = false,
     zcolormap=nothing,
+    cutoffmap=nothing,
     kwargs...
     )
     if WGLMode
@@ -69,17 +62,29 @@ function plot_implicit_surface!(
     end
     implicit_mesh = Mesh(f,Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+    
+    vertices = decompose(Point{3, Float64}, implicit_mesh)
+    triangles = decompose(TriangleFace{Int}, implicit_mesh)
+    i = 1
+    if cutoffmap!=nothing
+        while i <= length(triangles)
+            if cutoffmap(vertices[triangles[i][1]]) && cutoffmap(vertices[triangles[i][2]]) && cutoffmap(vertices[triangles[i][3]])
+                deleteat!(triangles, i)
+            else
+                i=i+1
+            end
+        end
+    end
     ax = fig[1,1]
 
     if wireframe
+        implicit_mesh = Mesh(vertices, triangles)
         if WGLMode
             wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
         else
             wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
         end
     else
-        vertices = decompose(Point{3, Float64}, implicit_mesh)
-        triangles = decompose(TriangleFace{Int}, implicit_mesh)
         if WGLMode
             if isnothing(zcolormap)
                 mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
@@ -102,7 +107,7 @@ end
 Plots an implicitly defined surface.
 =#
 function plot_implicit_surface(
-    f;
+    f::Function;
     show_axis = true,
     resolution=(800,800),
     aspect=(1.,1.,1.),
@@ -133,29 +138,24 @@ Adds a space curve, implicitly defined by two equations, to a scene.
 """
 function plot_implicit_curve!(
     fig::GLMakiePlottingLibrary.Figure,
-    f,
-    g;
+    f::Function,
+    g::Function;
     x_min = -2.0,
-    xmin = x_min,
     x_max = 2.0,
-    xmax = x_max,
-    y_min = xmin,
-    ymin = y_min,
-    y_max = xmax,
-    ymax = y_max,
-    z_min = xmin,
-    zmin = z_min,
-    z_max = xmax,
-    zmax = z_max,
-    xlims = (xmin, xmax),
-    ylims = (ymin, ymax),
-    zlims = (zmin, zmax),
-    color = :steelblue,
-    samples=(30,30,30),
-    linewidth=1.5,
-    MarchingModeIsCubes = true,
-    WGLMode = false,
-    transparency = true,
+    y_min = x_min,
+    y_max = x_max,
+    z_min = x_min,
+    z_max = x_max,
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
+    color::Symbol = :steelblue,
+    samples::Tuple{Int,Int,Int}=(30,30,30),
+    linewidth::Union{Float64,Int}=1.5,
+    MarchingModeIsCubes::Bool = true,
+    WGLMode::Bool = false,
+    transparency::Bool = true,
+    cutoffmap=nothing,
     kwargs...
 )
     if WGLMode
@@ -172,8 +172,10 @@ function plot_implicit_curve!(
     end
     f_implicit_mesh = Mesh(f, Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+    filter!(triang->cutoffmap(triang[1]) && cutoffmap(triang[2]) && cutoffmap(triang[3]), f_implicit_mesh)
     g_implicit_mesh = Mesh(g, Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+    filter!(triang->cutoffmap(triang[1]) && cutoffmap(triang[2]) && cutoffmap(triang[3]), g_implicit_mesh)
 
     lines=[]
     for triangle_f in f_implicit_mesh, triangle_g in g_implicit_mesh
@@ -201,9 +203,9 @@ function plot_implicit_curve!(
     else
         try
             foreach(line->linesegments!(ax, line; color=color, transparency=transparency, linewidth=linewidth, kwargs...), lines)
-            GLMakiePlottingLibrary.xlims!(ax, (xlims[1],xlims[2]))
-            GLMakiePlottingLibrary.ylims!(ax, (ylims[1],ylims[2]))
-            GLMakiePlottingLibrary.zlims!(ax, (zlims[1],zlims[2]))
+            xlims!(ax, (xlims[1],xlims[2]))
+            ylims!(ax, (ylims[1],ylims[2]))
+            zlims!(ax, (zlims[1],zlims[2]))
         catch e
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
         end
@@ -214,8 +216,8 @@ end
 Plots a space curve, implicitly defined by two equations.
 """
 function plot_implicit_curve(
-    f,
-    g;
+    f::Function,
+    g::Function;
     resolution=(800,800),
     aspect=(1.,1.,1.),
     show_axis=true,

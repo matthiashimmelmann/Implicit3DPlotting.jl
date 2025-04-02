@@ -1,7 +1,7 @@
 name = "Implicit3DPlotting"
 uuid = "d997a800-832a-4a4c-b340-7dddf3c1ad50"
 authors = ["Matthias Himmelmann <matthias.himmelmann@outlook.de>"]
-version = "0.3.1"
+version = "0.4.0"
 
 [deps]
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
