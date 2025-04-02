@@ -172,17 +172,15 @@ function plot_implicit_curve!(
     end
     f_implicit_mesh = Mesh(f, Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
-    filter!(triang->cutoffmap(triang[1]) && cutoffmap(triang[2]) && cutoffmap(triang[3]), f_implicit_mesh)
     g_implicit_mesh = Mesh(g, Rect(Vec(xlims[1], ylims[1],zlims[1]),
                             Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
-    filter!(triang->cutoffmap(triang[1]) && cutoffmap(triang[2]) && cutoffmap(triang[3]), g_implicit_mesh)
 
     lines=[]
     for triangle_f in f_implicit_mesh, triangle_g in g_implicit_mesh
         if(min(sum((triangle_f[1]-triangle_g[1]).^2), sum((triangle_f[2]-triangle_g[2]).^2), sum((triangle_f[3]-triangle_g[3]).^2))
                 < max(sum((triangle_f[1]-triangle_f[2]).^2), sum((triangle_f[2]-triangle_f[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2), sum((triangle_g[1]-triangle_g[2]).^2), sum((triangle_g[2]-triangle_g[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2)))
             intersection=intersectTwoTriangles(triangle_f, triangle_g)
-            if(length(intersection)>=2)
+            if(length(intersection)>=2) && (cutoffmap==nothing || cutoffmap(intersection[1]) && cutoffmap(intersection[2]))
                 push!(lines, [Point3f0(intersection[1]), Point3f0(intersection[2])])
             end
         end
