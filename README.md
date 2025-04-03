@@ -53,7 +53,7 @@ Finally, there are several additional visualization tools that may be useful. Wi
 
 ```julia
 g = x -> 2*prod(x) + 1 - sum(x.^2)
-Implicit3DPlotting.plot_implicit_surface(g; cutoffmap=x->x[1]^2+x[2]^2+x[3]^2-3>=0, samples=(250,250,250),
+plot_implicit_surface(g; cutoffmap=x->x[1]^2+x[2]^2+x[3]^2-3>=0, samples=(250,250,250),
        transparency=false, zcolormap=:viridis, xlims=(-1.25,1.25), ylims=(-1.25,1.25), zlims=(-1.25,1.25))
 ```
 
