@@ -15,9 +15,9 @@ julia> ]
 
 There are two main methods in this package: `plot_implicit_surface` and `plot_implicit_curve`. Let us first consider an example of the former:
 
-```
-julia> f(x) = x[1]^2+x[2]^2-x[3]^2-1
-julia> scene = plot_implicit_surface(f; transparency=false, xlims=(-3,3), ylims=(-3,3), zlims=(-3,3))
+```julia
+f(x) = x[1]^2+x[2]^2-x[3]^2-1
+scene = plot_implicit_surface(f; transparency=false, xlims=(-3,3), ylims=(-3,3), zlims=(-3,3))
 ```
 
 The result of this can be seen in the following image: 
@@ -29,10 +29,10 @@ Notice that the standard options are that the plot's color is `:steelblue`, the 
 
 As an example of the `plot_implicit_curve`, let us consider the input
 
-```
-julia> f(x)=x[1]^2+x[2]^2-x[3]^2-1
-julia> g(x)=x[1]^2+x[2]^2+x[3]^2-2
-julia> plot_implicit_curve(f, g)
+```julia
+f(x)=x[1]^2+x[2]^2-x[3]^2-1
+g(x)=x[1]^2+x[2]^2+x[3]^2-2
+plot_implicit_curve(f, g)
 ```
 
 which produces the following picture:
