@@ -153,7 +153,7 @@ function plot_implicit_curve!(
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
     color::Symbol = :steelblue,
-    samples::Tuple{Int,Int,Int}=(10,10,10),
+    samples::Tuple{Int,Int,Int}=(8,8,8),
     linewidth::Union{Float64,Int}=2.25,
     MarchingModeIsCubes::Bool = true,
     WGLMode::Bool = false,
@@ -189,8 +189,9 @@ function plot_implicit_curve!(
         for i in 1:Int(round(sum(samples)/3))
             lin_space = (rand(Float64,3) .- 0.5)'*x
             lin_jac = differentiate(vcat(poly_sys, lin_space), x)
-            for _ in 1:2
-                start_point = 0.2*(rand(Float64,3) .- 0.5)
+            for _ in 1:4
+                start_point = (i<=2 ? 0.025 : 0.5)*[xlims[2]-xlims[1], ylims[2]-ylims[1], zlims[2]-zlims[1]] .* (rand(Float64,3) .- 0.5)
+                display(start_point)
                 try
                     q = newtoncorrect(vcat(poly_sys, lin_space), x, lin_jac, start_point)
                     if !any(t->isapprox(norm(t-q),0; atol=1e-10), point_samples)
@@ -324,7 +325,7 @@ function newtoncorrect(equations, variables, jac, point; tol = 1e-14)
 	q = Base.copy(point)
 	global damping = 0.15
 	while(norm(evaluate(equations, variables=>q)) > tol)
-        if Base.time() - _time > 5
+        if Base.time() - _time > 2
             throw(error("Error_time"))
         end
 		J = evaluate.(jac, variables=>q)
