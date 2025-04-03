@@ -182,8 +182,7 @@ function plot_implicit_curve!(
         @var x[1:3]
         poly_f = Expression(f(x))
         poly_g = Expression(g(x))
-        point_samples = []
-        helper_lines, lines = [], []
+        point_samples, lines = [], []
         poly_sys = [poly_f, poly_g]
         jac = differentiate(poly_sys, x)
         for i in 1:Int(round(sum(samples)/3))
@@ -219,11 +218,8 @@ function plot_implicit_curve!(
                     break
                 end
             end
-            push!(helper_lines, one_line)
-        end
 
-        for line in helper_lines
-            for i in 1:length(line)-1
+            for i in 1:length(one_line)-1
                 if !any(tl->isapprox(tl[1], line[i], atol=step_size/2) && isapprox(tl[2], line[i+1], atol=step_size/2), lines) && !any(tl->isapprox(tl[2], line[i], atol=step_size/2) && isapprox(tl[1], line[i+1], atol=step_size/2), lines)
                     push!(lines, [line[i], line[i+1]])
                 end
