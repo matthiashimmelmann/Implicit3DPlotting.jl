@@ -10,7 +10,7 @@ end
 @testset "gordianknotcurves" begin
     g1(x) = sum(x.^2) - 1
     g2(x) = 2*prod(x)+1-sum(x.^2)
-    plot_implicit_curve(f, g; samples = (10,10,10), step_size=0.025)
+    plot_implicit_curve(g1, g2; samples = (10,10,10), step_size=0.025)
 end
 
 @testset "cayleyspectahedron" begin

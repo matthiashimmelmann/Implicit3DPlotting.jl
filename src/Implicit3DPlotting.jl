@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f0, scatter!, scatter, scale!, plot
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -202,14 +202,14 @@ function plot_implicit_curve!(
         end
 
         for point_sample in point_samples
-            one_line = [Point3f0(point_sample)]
+            one_line = [Point3f(point_sample)]
             q = Base.copy(point_sample)
             prev_flex = nullspace(evaluate(jac, x=>point_sample))[:,1]
             i = 1
             while true
                 q, prev_flex = euler_step(jac, x, step_size, prev_flex, q)
                 q = newtoncorrect(poly_sys, x, jac, q)
-                push!(one_line, Point3f0(q))
+                push!(one_line, Point3f(q))
                 i=i+1
                 if i<miniter
                     continue
@@ -220,8 +220,8 @@ function plot_implicit_curve!(
             end
 
             for i in 1:length(one_line)-1
-                if !any(tl->isapprox(tl[1], line[i], atol=step_size/2) && isapprox(tl[2], line[i+1], atol=step_size/2), lines) && !any(tl->isapprox(tl[2], line[i], atol=step_size/2) && isapprox(tl[1], line[i+1], atol=step_size/2), lines)
-                    push!(lines, [line[i], line[i+1]])
+                if !any(tl->isapprox(tl[1], one_line[i], atol=step_size/2) && isapprox(tl[2], one_line[i+1], atol=step_size/2), lines) && !any(tl->isapprox(tl[2], one_line[i], atol=step_size/2) && isapprox(tl[1], one_line[i+1], atol=step_size/2), lines)
+                    push!(lines, [one_line[i], one_line[i+1]])
                 end
             end
         end
@@ -238,7 +238,7 @@ function plot_implicit_curve!(
                     < max(sum((triangle_f[1]-triangle_f[2]).^2), sum((triangle_f[2]-triangle_f[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2), sum((triangle_g[1]-triangle_g[2]).^2), sum((triangle_g[2]-triangle_g[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2)))
                 intersection=intersectTwoTriangles(triangle_f, triangle_g)
                 if(length(intersection)>=2) && (cutoffmap==nothing || cutoffmap(intersection[1]) && cutoffmap(intersection[2]))
-                    push!(lines, [Point3f0(intersection[1]), Point3f0(intersection[2])])
+                    push!(lines, [Point3f(intersection[1]), Point3f(intersection[2])])
                 end
             end
         end
