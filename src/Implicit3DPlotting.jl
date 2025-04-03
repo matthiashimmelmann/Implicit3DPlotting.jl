@@ -191,7 +191,6 @@ function plot_implicit_curve!(
             lin_jac = differentiate(vcat(poly_sys, lin_space), x)
             for _ in 1:4
                 start_point = (i<=2 ? 0.025 : 0.5)*[xlims[2]-xlims[1], ylims[2]-ylims[1], zlims[2]-zlims[1]] .* (rand(Float64,3) .- 0.5)
-                display(start_point)
                 try
                     q = newtoncorrect(vcat(poly_sys, lin_space), x, lin_jac, start_point)
                     if !any(t->isapprox(norm(t-q),0; atol=1e-10), point_samples)
