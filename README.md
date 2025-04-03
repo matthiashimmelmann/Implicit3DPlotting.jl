@@ -6,7 +6,7 @@ Drawing inspiration from the Julia package [ImplicitPlots.jl](https://github.com
 
 ## Installation
 
-```
+```julia
 julia> ]
 (@v1.10) pkg> add Implicit3DPlotting
 ```
