@@ -75,7 +75,7 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
 - For surfaces: Add a color map dependent on the surface's z-value by `zcolormap = :viridis` (for other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/),
 - For surfaces: `lightingdirections = [Vec3f(t) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)]` to choose the lighting directions,
-- For surfaces: `lightintensity=0.44` can set the light intensity,
+- For surfaces: `lightintensity=0.44` can be used to set the light intensity,
 - Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
 - Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
