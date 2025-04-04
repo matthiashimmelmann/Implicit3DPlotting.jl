@@ -48,7 +48,8 @@ function plot_implicit_surface!(
     wireframe::Bool=false,
     MarchingModeIsCubes::Bool=true,
     WGLMode::Bool = false,
-    zcolormap=nothing,
+    color_gradient=:turbo,
+    color_mapping=nothing,
     cutoffmap=nothing,
     kwargs...
     )
@@ -88,18 +89,20 @@ function plot_implicit_surface!(
         end
     else
         if WGLMode
-            if isnothing(zcolormap)
+            if isnothing(color_mapping)
                 mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
             else
-                colors = [v[3] for v in vertices]
-                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
+                colors = [color_mapping(v) for v in vertices]
+                colors = (colors .- minimum(colors)) ./ (maximum(colors)-minimum(colors))
+                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=color_gradient, kwargs...)
             end
         else
-            if isnothing(zcolormap)
+            if isnothing(color_mapping)
                 mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
             else
-                colors = [v[3] for v in vertices]
-                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=zcolormap, kwargs...)
+                colors = [color_mapping(v) for v in vertices]
+                colors = (colors .- minimum(colors)) ./ (maximum(colors)-minimum(colors))
+                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=color_gradient, kwargs...)
             end        
         end
     end
@@ -117,22 +120,20 @@ function plot_implicit_surface(
     in_line=false,
     transparency=true,
     fontsize=17,
-    lightingdirections = [Vec3f(t) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)],
-    lightintensity=0.44,
+    lighting = [(Vec3f(t[1:3]),t[4]) for t in [(0,0,-1,0.65), (1,-1,-1,0.5), (1,1,-1,0.5), (-1,1,1,0.5), (-1,-1,-1,0.5), (0,0,1,0.5)]],
     kwargs...
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
-        lights = [DirectionalLight(RGBf(lightintensity, lightintensity, lightintensity), vector) for vector in lightingdirections]
+        lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
         ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        lights = [DirectionalLight(RGBf(lightintensity, lightintensity, lightintensity), vector) for vector in lightingdirections]
+        lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
         ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
-
     end
     plot_implicit_surface!(ax, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
     return(fig)
