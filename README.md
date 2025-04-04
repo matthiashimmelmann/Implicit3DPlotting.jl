@@ -53,8 +53,8 @@ Finally, there are several additional visualization tools that may be useful. Wi
 
 ```julia
 g = x -> 2*prod(x) + 1 - sum(x.^2)
-plot_implicit_surface(g; cutoffmap=x->x[1]^2+x[2]^2+x[3]^2-3>=0, samples=(250,250,250),
-       transparency=false, zcolormap=:viridis, xlims=(-1.25,1.25), ylims=(-1.25,1.25), zlims=(-1.25,1.25))
+plot_implicit_surface(g; cutoffmap=x->x[1]^2+x[2]^2+x[3]^2-3>=0, samples=(120,120,120), transparency=false,
+        xlims=(-1.1,1.1), ylims=(-1.1,1.1), zlims=(-1.1,1.1), show_axis=true, color_mapping=x->sum(x.^2))
 ```
 
 which produces the following picture:
@@ -69,20 +69,20 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 
 - `xlims`, `ylims` and `zlims` are vectors that determine the search domain for the meshing algorithms: `xlims = (-3,3)`,
 - `color = :steelblue`,
+- `samples=(30,30,30)` changes the discretization from which `MarchingCubes` draws samples.
 - For surfaces: `transparency = true`,
-- For surfaces: `zcolormap = :viridis` colors a surface with respect to its z-value,
-- For surfaces: `shading = true`,
-- For surfaces: Do we want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
-- For surfaces: Add a color map dependent on the surface's z-value by `zcolormap = :viridis` (for other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/),
-- For surfaces: `lightingdirections = [Vec3f(t) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)]` to choose the lighting directions,
-- For surfaces: `lightintensity=0.44` can be used to set the light intensity,
-- Marching tetrahedra or marching cubes? `MarchingModeIsCubes = true`,
+- For surfaces: `color_gradient = :turbo` colors a surface with a gradient. For other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/. Requires changing the following as well:
+- For surfaces: `color_mapping = nothing`. Provides a function with respect to which the `color_gradient` is applied. E.g. `x->sum(x.^2)`.
+- For surfaces: Do you want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
+- For surfaces: `lighting = [(Vec3f(t), 0.45) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)]` to choose the lighting directions. This keyword's format is a tuple of `(direction_vector, intensity)`.
+- For surfaces: `transparency=false` lets us change the surface's opacity setting.
+- `cutoffmap::Function = x->x[1]^2+x[2]^2+x[3]^2-1>=0`: Lets the user define an inequality, outside of which no mesh facets are considered.
+- Marching tetrahedra or marching cubes as sampling method? `MarchingModeIsCubes = true`,
 - Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
 - `resolution=(800,800)`,
-- `scale_plot=false`,
+- `fontsize=17` allows us to change the fontsize of the `x`/`y`/`z`-axis label
 - Should the plot be displayed in-line or in an external window? `in_line=false`,
 - For curves: How thick should the linestroke be? `linewidth = 1.5`,
-- We can rescale the plot with `scaling = (x,y,z)`,
+- We can rescale the plot with `aspect = (x,y,z)`,
 - Other `GLMakie`-based `kwargs...` (see https://makie.juliaplots.org/stable/).
-- `cutoffmap::Function = x->x[1]^2+x[2]^2+x[3]^2-1>=0`: Lets the user define an inequality, outside of which no mesh facets are considered.
