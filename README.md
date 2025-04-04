@@ -54,7 +54,7 @@ Finally, there are several additional visualization tools that may be useful. Wi
 ```julia
 g = x -> 2*prod(x) + 1 - sum(x.^2)
 plot_implicit_surface(g; cutoffmap=x->x[1]^2+x[2]^2+x[3]^2-3>=0, samples=(120,120,120), transparency=false,
-        xlims=(-1.1,1.1), ylims=(-1.1,1.1), zlims=(-1.1,1.1), show_axis=true, color_mapping=x->sum(x.^2))
+    xlims=(-1.1,1.1), ylims=(-1.1,1.1), zlims=(-1.1,1.1), show_axis=true, color_mapping=x->sum(x.^2))
 ```
 
 which produces the following picture:
