@@ -118,7 +118,7 @@ function plot_implicit_surface(
     transparency=true,
     fontsize=17,
     lightingdirections = [Vec3f(t) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)],
-    lightintensity=0.425,
+    lightintensity=0.44,
     kwargs...
 )
     if WGLMode
