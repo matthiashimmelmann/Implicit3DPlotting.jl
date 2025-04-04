@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot, DirectionalLight, LScene, RGBf, Vec3f
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -19,6 +19,7 @@ import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point, 
 import Polyhedra: vrep, intersect, polyhedron
 import LinearAlgebra: pinv, norm, nullspace
 import HomotopyContinuation: evaluate, differentiate, @var, Expression
+import IterTools: product
 
 export plot_implicit_surface,
        plot_implicit_surface!,
@@ -30,7 +31,7 @@ export plot_implicit_surface,
 
 
 function plot_implicit_surface!(
-    fig::GLMakiePlottingLibrary.Figure,
+    ax,
     f::Function;
     x_min = -3.0,
     x_max = 3.0,
@@ -77,7 +78,6 @@ function plot_implicit_surface!(
             end
         end
     end
-    ax = fig[1,1]
 
     if wireframe
         implicit_mesh = Mesh(vertices, triangles)
@@ -117,22 +117,24 @@ function plot_implicit_surface(
     in_line=false,
     transparency=true,
     fontsize=17,
+    lightingdirections = [Vec3f(t) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)],
+    lightintensity=0.425,
     kwargs...
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        lights = [DirectionalLight(RGBf(lightintensity, lightintensity, lightintensity), vector) for vector in lightingdirections]
+        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize)
-        if !show_axis
-            GLMakiePlottingLibrary.hidespines!(ax)
-            GLMakiePlottingLibrary.hidedecorations!(ax)
-        end
+        lights = [DirectionalLight(RGBf(lightintensity, lightintensity, lightintensity), vector) for vector in lightingdirections]
+        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
+
     end
-    plot_implicit_surface!(fig, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
+    plot_implicit_surface!(ax, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
     return(fig)
 end
 
@@ -290,6 +292,7 @@ function plot_implicit_curve(
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
+    
         ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize)
         if !show_axis
             GLMakiePlottingLibrary.hidespines!(ax)
