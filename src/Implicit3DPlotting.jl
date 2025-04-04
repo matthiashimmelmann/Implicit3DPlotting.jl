@@ -125,7 +125,7 @@ function plot_implicit_surface(
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
-        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, scale_plot=scale_plot, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
         lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
         ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
     else
