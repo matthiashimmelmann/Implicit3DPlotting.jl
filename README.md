@@ -22,6 +22,10 @@ scene = plot_implicit_surface(f; transparency=false, xlims=(-3,3), ylims=(-3,3),
 
 The result of this can be seen in the following image: 
 
+<p align="center">
+  <img src="https://github.com/matthiashimmelmann/Implicit3DPlotting.jl/blob/main/img/hyperboloid.png" width="600", height="600">
+</p>
+
 Notice that the standard options are that the plot's color is `:steelblue`, the plot is transparent, the surface's shading is activated, the standard meshing method is `MarchingCubes`, because it is slightly faster than `MarchingTetrahedra`, and the standard search domain is the hypercube `[-3,3]^3` per default. All these settings can be changed in the package's methods. All possible options are listed at the end of the README file.
 
 As an example of the `plot_implicit_curve`, let us consider the input
