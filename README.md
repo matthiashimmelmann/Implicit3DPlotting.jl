@@ -31,8 +31,8 @@ Notice that the standard options are that the plot's color is `:steelblue`, the 
 As an example of the `plot_implicit_curve`, let us consider the input
 
 ```julia
-f(x) = sum(x.^2) - 1
-g(x) = sum(x.^2) - 2
+f(x) = x[1]^2+x[2]^2-2
+g(x) = x[3]^2-1
 plot_implicit_curve(f, g)
 ```
 
