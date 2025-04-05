@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot, DirectionalLight, LScene, RGBf, Vec3f, Rect3f
+import GLMakie: wireframe!, linesegments!, mesh!, Point3f, DirectionalLight, LScene, RGBf
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -33,15 +33,9 @@ export plot_implicit_surface,
 function plot_implicit_surface!(
     ax,
     f::Function;
-    x_min = -3.0,
-    x_max = 3.0,
-    y_min = x_min,
-    y_max = x_max,
-    z_min = x_min,
-    z_max = x_max,
-    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
-    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
-    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
     color::Symbol = :steelblue,
     transparency::Bool = false,
     samples::Tuple{Int,Int,Int}=(35,35,35),
@@ -113,6 +107,15 @@ Plots an implicitly defined surface.
 =#
 function plot_implicit_surface(
     f::Function;
+    x_min = -3.0,
+    x_max = 3.0,
+    y_min = x_min,
+    y_max = x_max,
+    z_min = x_min,
+    z_max = x_max,
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
     show_axis = true,
     resolution=(820,800),
     aspect=(1.,1.,1.),
@@ -120,22 +123,22 @@ function plot_implicit_surface(
     in_line=false,
     transparency=true,
     fontsize=17,
-    lighting = [(Vec3f(t[1:3]),t[4]) for t in [(0,0,-1,0.55), (-1,0,0,0.55),(1,0,0,0.55),(0,-1,0,0.55),(0,1,0,0.55), (0,0,1,0.55)]],
+    lighting = [(Vec(t[1:3]),t[4]) for t in [(0,0,-1,0.55), (-1,0,0,0.55),(1,0,0,0.55),(0,-1,0,0.55),(0,1,0,0.55), (0,0,1,0.55)]],
     kwargs...
 )
     if WGLMode
         WGLMakiePlottingLibrary.activate!()
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
         lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
-        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
+        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
         lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
-        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize), show_axis=show_axis)
+        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     end
-    plot_implicit_surface!(ax, f; WGLMode=WGLMode, transparency=transparency, kwargs...)
+    plot_implicit_surface!(ax, f; xlims=xlims, ylims=ylims, zlims=zlims, WGLMode=WGLMode, transparency=transparency, kwargs...)
     return(fig)
 end
 
@@ -199,6 +202,9 @@ function plot_implicit_curve!(
         end
 
         for point_sample in point_samples
+            if any(tl->isapprox(tl[1], point_sample, atol=step_size) || isapprox(tl[2], point_sample, atol=step_size), lines)
+                continue
+            end
             one_line = [Point3f(point_sample)]
             q = Base.copy(point_sample)
             prev_flex = nullspace(evaluate(jac, x=>point_sample))[:,1]
@@ -221,6 +227,35 @@ function plot_implicit_curve!(
                     push!(lines, [one_line[i], one_line[i+1]])
                 end
             end
+
+            if isapprox(point_sample, one_line[end], atol=step_size)
+                continue
+            end
+
+            # Also run the algorithm in the opposite direction
+            one_line = [Point3f(point_sample)]
+            q = Base.copy(point_sample)
+            prev_flex = -nullspace(evaluate(jac, x=>point_sample))[:,1]
+            i = 1
+            while true
+                q, prev_flex = euler_step(jac, x, step_size, prev_flex, q)
+                q = newtoncorrect(poly_sys, x, jac, q)
+                push!(one_line, Point3f(q))
+                i=i+1
+                if i<miniter
+                    continue
+                end
+                if (cutoffmap!=nothing && !cutoffmap(q)) || (q[1]<xlims[1] || q[1]>xlims[2] || q[2]<ylims[1] || q[2]>ylims[2] || q[3]<zlims[1] || q[3]>zlims[2] ) || isapprox(norm(q-point_sample),0; atol=step_size)
+                    break
+                end
+            end
+
+            for i in 1:length(one_line)-1
+                if !any(tl->isapprox(tl[1], one_line[i], atol=step_size/2) && isapprox(tl[2], one_line[i+1], atol=step_size/2), lines) && !any(tl->isapprox(tl[2], one_line[i], atol=step_size/2) && isapprox(tl[1], one_line[i+1], atol=step_size/2), lines)
+                    push!(lines, [one_line[i], one_line[i+1]])
+                end
+            end
+
         end
 
     catch e
@@ -285,12 +320,12 @@ function plot_implicit_curve(
         WGLMakiePlottingLibrary.activate!()
         WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
-        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect3f(Vec3f(xlims[1],ylims[1],zlims[1]),Vec3f(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
+        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect3f(Vec3f(xlims[1],ylims[1],zlims[1]),Vec3f(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
+        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     end
     plot_implicit_curve!(ax, f, g; xlims=xlims, ylims=ylims, zlims=zlims, WGLMode=WGLMode, kwargs...)
     return(fig)
@@ -340,7 +375,7 @@ end
 
 function euler_step(jacobian, variables, step_size::Float64, prev_flex::Vector{Float64}, point::Union{Vector{Int},Vector{Float64}})
     J = evaluate(jacobian, variables=>point)
-    flex_space = nullspace(J)[:,1]
+    flex_space = nullspace(J)
     flex_coefficients = pinv(flex_space) * prev_flex
     predicted_inf_flex = sum(flex_space[:,i] .* flex_coefficients[i] for i in 1:length(flex_coefficients))
     predicted_inf_flex = predicted_inf_flex ./ norm(predicted_inf_flex)
