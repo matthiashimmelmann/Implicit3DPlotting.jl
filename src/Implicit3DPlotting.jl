@@ -43,7 +43,7 @@ function plot_implicit_surface!(
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
     color::Symbol = :steelblue,
-    transparency::Bool = true,
+    transparency::Bool = false,
     samples::Tuple{Int,Int,Int}=(35,35,35),
     wireframe::Bool=false,
     MarchingModeIsCubes::Bool=true,
@@ -120,7 +120,7 @@ function plot_implicit_surface(
     in_line=false,
     transparency=true,
     fontsize=17,
-    lighting = [(Vec3f(t[1:3]),t[4]) for t in [(0,0,-1,0.65), (1,-1,-1,0.5), (1,1,-1,0.5), (-1,1,1,0.5), (-1,-1,-1,0.5), (0,0,1,0.5)]],
+    lighting = [(Vec3f(t[1:3]),t[4]) for t in [(0,0,-1,0.55), (-1,0,0,0.55),(1,0,0,0.55),(0,-1,0,0.55),(0,1,0,0.55), (0,0,1,0.55)]],
     kwargs...
 )
     if WGLMode
