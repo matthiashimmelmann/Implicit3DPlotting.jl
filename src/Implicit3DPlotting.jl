@@ -11,7 +11,7 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot, DirectionalLight, LScene, RGBf, Vec3f
+import GLMakie: xlims!, ylims!, zlims!, wireframe!, linesegments!, mesh!, Scene, cam3d!, Point3f, scatter!, scatter, scale!, plot, DirectionalLight, LScene, RGBf, Vec3f, Rect3f
 import GLMakie as GLMakiePlottingLibrary
 import WGLMakie as WGLMakiePlottingLibrary
 import Meshing: MarchingCubes, MarchingTetrahedra
@@ -143,20 +143,11 @@ end
 Adds a space curve, implicitly defined by two equations, to a scene.
 """
 function plot_implicit_curve!(
-    fig::GLMakiePlottingLibrary.Figure,
+    ax,
     f::Function,
     g::Function;
-    x_min = -2.0,
-    x_max = 2.0,
-    y_min = x_min,
-    y_max = x_max,
-    z_min = x_min,
-    z_max = x_max,
-    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
-    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
-    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
     color::Symbol = :steelblue,
-    samples::Tuple{Int,Int,Int}=(8,8,8),
+    samples::Tuple{Int,Int,Int}=(7,7,7),
     linewidth::Union{Float64,Int}=2.25,
     MarchingModeIsCubes::Bool = true,
     WGLMode::Bool = false,
@@ -164,6 +155,9 @@ function plot_implicit_curve!(
     transparency::Bool = true,
     cutoffmap=nothing,
     miniter=5,
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-2.,2),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-2.,2),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-2.,2),
     kwargs...
 )
     if WGLMode
@@ -247,24 +241,17 @@ function plot_implicit_curve!(
         end
     end
 
-    ax = fig[1,1]
 
     if WGLMode
         # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
         try
             foreach(line->WGLMakiePlottingLibrary.linesegments!(ax, line; transparency=transparency, color=color, linewidth=3*linewidth, kwargs...), lines)
-            WGLMakiePlottingLibrary.xlims!(ax, xlims[1],xlims[2])
-            WGLMakiePlottingLibrary.ylims!(ax, ylims[1],ylims[2])
-            WGLMakiePlottingLibrary.zlims!(ax, zlims[1],zlims[2])
         catch e
             println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
         end
     else
         try
             foreach(line->linesegments!(ax, line; color=color, transparency=transparency, linewidth=linewidth, kwargs...), lines)
-            xlims!(xlims[1],xlims[2])
-            ylims!(ylims[1],ylims[2])
-            zlims!(zlims[1],zlims[2])
         catch e
             println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
         end
@@ -277,6 +264,15 @@ Plots a space curve, implicitly defined by two equations.
 function plot_implicit_curve(
     f::Function,
     g::Function;
+    x_min = -2.0,
+    x_max = 2.0,
+    y_min = x_min,
+    y_max = x_max,
+    z_min = x_min,
+    z_max = x_max,
+    xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
+    ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
+    zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
     resolution=(820,800),
     aspect=(1.,1.,1.),
     fontsize=17,
@@ -289,18 +285,14 @@ function plot_implicit_curve(
         WGLMakiePlottingLibrary.activate!()
         WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
+        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect3f(Vec3f(xlims[1],ylims[1],zlims[1]),Vec3f(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     else
         GLMakiePlottingLibrary.activate!()
         #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
         global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-    
-        ax = GLMakiePlottingLibrary.Axis3(fig[1,1], aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize)
-        if !show_axis
-            GLMakiePlottingLibrary.hidespines!(ax)
-            GLMakiePlottingLibrary.hidedecorations!(ax)
-        end
+        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect3f(Vec3f(xlims[1],ylims[1],zlims[1]),Vec3f(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
     end
-    plot_implicit_curve!(fig, f, g; WGLMode=WGLMode, kwargs...)
+    plot_implicit_curve!(ax, f, g; xlims=xlims, ylims=ylims, zlims=zlims, WGLMode=WGLMode, kwargs...)
     return(fig)
 end
 
