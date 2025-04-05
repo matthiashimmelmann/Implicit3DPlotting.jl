@@ -69,7 +69,6 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 
 - `xlims`, `ylims` and `zlims` are vectors that determine the search domain for the meshing algorithms: `xlims = (-3,3)`,
 - `color = :steelblue`,
-- `samples=(30,30,30)` changes the discretization from which `MarchingCubes` draws samples.
 - For surfaces: `transparency = true`,
 - For surfaces: `color_gradient = :turbo` colors a surface with a gradient. For other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/. Requires changing the following as well:
 - For surfaces: `color_mapping = nothing`. Provides a function with respect to which the `color_gradient` is applied. E.g. `x->sum(x.^2)`.
@@ -78,7 +77,7 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: `transparency=false` lets us change the surface's opacity setting.
 - `cutoffmap::Function = x->x[1]^2+x[2]^2+x[3]^2-1>=0`: Lets the user define an inequality, outside of which no mesh facets are considered.
 - Marching tetrahedra or marching cubes as sampling method? `MarchingModeIsCubes = true`,
-- Samples determine the accuracy of the plot's display. The higher the sampling numbers, the better. `samples=(35,35,35)`,
+- Samples determine the discretization for the visualization. The higher the sampling numbers, the better. `samples=(35,35,35)`,
 - Display axes? `show_axis = true`,
 - `resolution=(800,800)`,
 - `fontsize=17` allows us to change the fontsize of the `x`/`y`/`z`-axis label
