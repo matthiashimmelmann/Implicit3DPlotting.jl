@@ -73,7 +73,7 @@ The options that can be changed in the methods for plotting 3D curves and surfac
 - For surfaces: `color_gradient = :turbo` colors a surface with a gradient. For other color schemes, see https://docs.juliaplots.org/latest/generated/colorschemes/. Requires changing the following as well:
 - For surfaces: `color_mapping = nothing`. Provides a function with respect to which the `color_gradient` is applied. E.g. `x->sum(x.^2)`.
 - For surfaces: Do you want the plot to be displayed as a 1-skeleton (wireframe) or a surface? `wireframe = false`,
-- For surfaces: `lighting = [(Vec3f(t), 0.45) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)]` to choose the lighting directions. This keyword's format is a tuple of `(direction_vector, intensity)`.
+- For surfaces: `lighting = [(Vec3f(t), 0.45) for t in vcat(product(-1:2:1, -1:2:1, -1:2:1)...)]` to choose the lighting directions. This keyword's format is a list of tuples of the form `(direction_vector, intensity)`.
 - For surfaces: `transparency=false` lets us change the surface's opacity setting.
 - `cutoffmap::Function = x->x[1]^2+x[2]^2+x[3]^2-1>=0`: Lets the user define an inequality, outside of which no mesh facets are considered.
 - Marching tetrahedra or marching cubes as sampling method? `MarchingModeIsCubes = true`,
