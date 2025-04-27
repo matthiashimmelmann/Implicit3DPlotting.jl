@@ -36,7 +36,7 @@ function plot_implicit_surface!(
     xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
-    color::Symbol = :steelblue,
+    color::Union{Symbol,Tuple(Symbol,Float64)} = :steelblue,
     transparency::Bool = false,
     samples::Tuple{Int,Int,Int}=(35,35,35),
     wireframe::Bool=false,
@@ -149,7 +149,7 @@ function plot_implicit_curve!(
     ax,
     f::Function,
     g::Function;
-    color::Symbol = :steelblue,
+    color::Union{Symbol,Tuple(Symbol,Float64)} = :steelblue,
     samples::Tuple{Int,Int,Int}=(7,7,7),
     linewidth::Union{Float64,Int}=2.25,
     MarchingModeIsCubes::Bool = true,
