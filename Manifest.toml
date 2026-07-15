@@ -2,7 +2,7 @@
 
 julia_version = "1.12.4"
 manifest_format = "2.0"
-project_hash = "7e9d1240fb7636160a5446b8bddeb8ec6f379eaf"
+project_hash = "261c949355ebd38ff635ed037d2e6d6c98faee63"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "ec6be48a85c93d995563b84bff8a86bc98df45ce"
@@ -815,10 +815,10 @@ uuid = "905a6f67-0a94-5f89-b386-d35d92009cd1"
 version = "3.2.2+0"
 
 [[deps.Implicit3DPlotting]]
-deps = ["GLMakie", "HomotopyContinuation", "IterTools", "LinearAlgebra", "Meshing", "Test"]
+deps = ["GLMakie", "HomotopyContinuation", "LinearAlgebra", "Meshing", "Test"]
 path = "."
 uuid = "d997a800-832a-4a4c-b340-7dddf3c1ad50"
-version = "0.5.4"
+version = "0.6.0"
 
 [[deps.IndirectArrays]]
 git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"

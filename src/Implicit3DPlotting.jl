@@ -16,7 +16,6 @@ import GLMakie.GeometryBasics: Mesh, Vec3f, decompose, TriangleFace, Point, norm
 import Meshing: MarchingCubes, MarchingTetrahedra, isosurface
 import LinearAlgebra: pinv, norm, nullspace, cross, dot
 import HomotopyContinuation: evaluate, differentiate, @var, Expression
-import IterTools: product
 
 export plot_implicit_surface,
        plot_implicit_surface!,
@@ -317,7 +316,7 @@ function plot_implicit_curve(
     xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
-    resolution=(820,800),
+    resolution=(800,800),
     aspect=(1.,1.,1.),
     fontsize=17,
     show_axis=true,
