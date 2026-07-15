@@ -11,27 +11,22 @@ module Implicit3DPlotting
     website:    matthiashimmelmann.github.io/
 =#
 
-import GLMakie: wireframe!, linesegments!, mesh!, Point3f, DirectionalLight, LScene, RGBf
-import GLMakie as GLMakiePlottingLibrary
-import WGLMakie as WGLMakiePlottingLibrary
-import Meshing: MarchingCubes, MarchingTetrahedra
-import GLMakie.GeometryBasics: Mesh, Rect, Vec, decompose, TriangleFace, Point, SimpleFaceView
-import Polyhedra: vrep, intersect, polyhedron
-import LinearAlgebra: pinv, norm, nullspace
+import GLMakie: Figure, wireframe!, linesegments!, mesh!, Point3f, DirectionalLight, LScene, RGBf, Axis3, hidedecorations!, hidespines!
+import GLMakie.GeometryBasics: Mesh, Vec3f, decompose, TriangleFace, Point, normal_mesh
+import Meshing: MarchingCubes, MarchingTetrahedra, isosurface
+import LinearAlgebra: pinv, norm, nullspace, cross, dot
 import HomotopyContinuation: evaluate, differentiate, @var, Expression
 import IterTools: product
 
 export plot_implicit_surface,
        plot_implicit_surface!,
        plot_implicit_curve,
-       plot_implicit_curve!,
+       plot_implicit_curve!
 #INFO: The following packages are not maintained by me. Find them here: https://github.com/MakieOrg/Makie.jl
-       GLMakiePlottingLibrary,
-       WGLMakiePlottingLibrary
 
 
 function plot_implicit_surface!(
-    ax,
+    ax::Axis3,
     f::Function;
     xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-3,3),
@@ -41,65 +36,67 @@ function plot_implicit_surface!(
     samples::Tuple{Int,Int,Int}=(35,35,35),
     wireframe::Bool=false,
     MarchingModeIsCubes::Bool=true,
-    WGLMode::Bool = false,
     color_gradient=:turbo,
     color_mapping=nothing,
     cutoffmap=nothing,
+    diffuse = Vec3f(0.8),
+    specular = Vec3f(1.1),
+    shininess = 60f0,
+    backlight = 5f0,
     kwargs...
-    )
-    if WGLMode
-        WGLMakiePlottingLibrary.activate!()
-    else
-        GLMakiePlottingLibrary.activate!()
-    end
+)
 
     try
         f([1,1,1])
     catch
-        throw("The specified function does not take 3 arguments.")
-    end
-    implicit_mesh = Mesh(f,Rect(Vec(xlims[1], ylims[1],zlims[1]),
-                            Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
-    
-    vertices = decompose(Point{3, Float64}, implicit_mesh)
-    triangles = decompose(TriangleFace{Int}, implicit_mesh)
-    i = 1
-    if cutoffmap!=nothing
-        while i <= length(triangles)
-            if cutoffmap(vertices[triangles[i][1]]) && cutoffmap(vertices[triangles[i][2]]) && cutoffmap(vertices[triangles[i][3]])
-                deleteat!(triangles, i)
-            else
-                i=i+1
-            end
+        try
+            f(1,1,1)
+            f = x->f(x[1],x[2],x[3])
+        catch
+            throw("The specified function `f` does not take 3 arguments.")
         end
     end
+    algo = MarchingModeIsCubes ? MarchingCubes(; iso=0) : MarchingTetrahedra(; iso=0)
+    ξx=xlims[1]:(xlims[2]-xlims[1])/samples[1]:xlims[2]
+    ξy=ylims[1]:(ylims[2]-ylims[1])/samples[2]:ylims[2]
+    ξz=zlims[1]:(zlims[2]-zlims[1])/samples[3]:zlims[2]
+    f_values = [f([x,y,z]) for x in ξx, y in ξy, z in ξz]
+    vertices, facets = isosurface(f_values, algo, ξx, ξy, ξz)
+    implicit_mesh = Mesh(Point3f.(vertices), TriangleFace.(facets))
 
     if wireframe
-        implicit_mesh = Mesh(vertices, triangles)
-        if WGLMode
-            wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
-        else
-            wireframe!(ax, implicit_mesh, color=color, transparency=transparency)
-        end
+        wireframe!(ax, implicit_mesh; 
+            color=color, 
+            transparency=transparency, 
+            kwargs...
+        )
     else
-        if WGLMode
-            if isnothing(color_mapping)
-                mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
-            else
-                colors = [color_mapping(v) for v in vertices]
-                colors = (colors .- minimum(colors)) ./ (maximum(colors)-minimum(colors))
-                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=color_gradient, kwargs...)
-            end
+        if isnothing(color_mapping)
+            mesh!(ax, normal_mesh(implicit_mesh); 
+                color = color, 
+                diffuse = diffuse,
+                specular = specular,
+                shininess = shininess,
+                backlight = backlight,
+                transparency = transparency,
+                kwargs...
+            )
         else
-            if isnothing(color_mapping)
-                mesh!(ax, vertices, triangles, color=color, transparency=transparency, kwargs...)
-            else
-                colors = [color_mapping(v) for v in vertices]
-                colors = (colors .- minimum(colors)) ./ (maximum(colors)-minimum(colors))
-                mesh!(ax, vertices, triangles, color=colors, transparency=transparency, colormap=color_gradient, kwargs...)
-            end        
-        end
+            colors = [color_mapping(v) for v in vertices]
+            colors = (colors .- minimum(colors)) ./ (maximum(colors)-minimum(colors))
+            mesh!(ax, normal_mesh(implicit_mesh);
+                color = colors, 
+                diffuse = diffuse,
+                specular = specular,
+                shininess = shininess,
+                backlight = backlight,
+                transparency=transparency,
+                colormap=color_gradient, 
+                kwargs...
+            )
+        end        
     end
+    return nothing
 end
 
 #=
@@ -116,29 +113,36 @@ function plot_implicit_surface(
     xlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (x_min, x_max),
     ylims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (y_min, y_max),
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (z_min, z_max),
-    show_axis = true,
-    resolution=(820,800),
+    show_axis = false,
+    resolution=(800,800),
     aspect=(1.,1.,1.),
-    WGLMode=false,
-    in_line=false,
+    samples::Tuple{Int,Int,Int}=(35,35,35),
     transparency=true,
     fontsize=17,
-    lighting = [(Vec(t[1:3]),t[4]) for t in [(0,0,-1,0.55), (-1,0,0,0.55),(1,0,0,0.55),(0,-1,0,0.55),(0,1,0,0.55), (0,0,1,0.55)]],
+    diffuse = Vec3f(1.1),
+    specular = Vec3f(0.8),
+    shininess = 60f0,
+    backlight = 4f0,
     kwargs...
 )
-    if WGLMode
-        WGLMakiePlottingLibrary.activate!()
-        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
-        lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
-        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
-    else
-        GLMakiePlottingLibrary.activate!()
-        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        lights = [DirectionalLight(RGBf(vector[2], vector[2], vector[2]), vector[1]) for vector in lighting]
-        ax = LScene(fig[1, 1], scenekw = (lights = lights, aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
+    global fig = Figure(size=resolution)
+    ax = Axis3(fig[1,1], aspect=aspect)
+    if !show_axis
+        hidedecorations!(ax)
+        hidespines!(ax)
     end
-    plot_implicit_surface!(ax, f; xlims=xlims, ylims=ylims, zlims=zlims, WGLMode=WGLMode, transparency=transparency, kwargs...)
+    plot_implicit_surface!(ax, f; 
+        xlims=xlims, 
+        ylims=ylims, 
+        zlims=zlims, 
+        transparency=transparency, 
+        diffuse=diffuse,
+        samples=samples,
+        specular=specular, 
+        shininess=shininess, 
+        backlight=backlight, 
+        kwargs...
+    )
     return(fig)
 end
 
@@ -150,10 +154,9 @@ function plot_implicit_curve!(
     f::Function,
     g::Function;
     color::Union{Symbol,Tuple{Symbol,Float64}} = :steelblue,
-    samples::Tuple{Int,Int,Int}=(7,7,7),
     linewidth::Union{Float64,Int}=2.25,
     MarchingModeIsCubes::Bool = true,
-    WGLMode::Bool = false,
+    samples::Tuple{Int,Int,Int}=(10,10,10),
     step_size=0.025,
     transparency::Bool = true,
     cutoffmap=nothing,
@@ -163,17 +166,25 @@ function plot_implicit_curve!(
     zlims::Tuple{Union{Float64,Int},Union{Float64,Int}} = (-2.,2),
     kwargs...
 )
-    if WGLMode
-        WGLMakiePlottingLibrary.activate!()
-    else
-        GLMakiePlottingLibrary.activate!()
-    end
-
     try
         f([1,1,1])
+    catch
+        try
+            f(1,1,1)
+            f = x->f(x[1],x[2],x[3])
+        catch
+            throw("The specified function `f` does not take 3 arguments.")
+        end
+    end
+     try
         g([1,1,1])
     catch
-        throw("One of the specified function does not take 3 arguments.")
+        try
+            g(1,1,1)
+            g = x->g(x[1],x[2],x[3])
+        catch
+            throw("The specified function `g` does not take 3 arguments.")
+        end
     end
 
     lines=[]
@@ -259,16 +270,23 @@ function plot_implicit_curve!(
         end
 
     catch e
-        @warn "The given functions f and g could not be cast to polynomials. Error code: $(e)."
-        f_implicit_mesh = Mesh(f, Rect(Vec(xlims[1], ylims[1],zlims[1]),
-                                Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
-        g_implicit_mesh = Mesh(g, Rect(Vec(xlims[1], ylims[1],zlims[1]),
-                                Vec(xlims[2]-xlims[1], ylims[2]-ylims[1],zlims[2]-zlims[1])), samples=samples, MarchingModeIsCubes ? MarchingCubes() : MarchingTetrahedra())
+        @warn "The given functions `f` and `g` could not be cast to polynomials. Error code: $(e)."        
 
-        for triangle_f in f_implicit_mesh, triangle_g in g_implicit_mesh
-            if(min(sum((triangle_f[1]-triangle_g[1]).^2), sum((triangle_f[2]-triangle_g[2]).^2), sum((triangle_f[3]-triangle_g[3]).^2))
-                    < max(sum((triangle_f[1]-triangle_f[2]).^2), sum((triangle_f[2]-triangle_f[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2), sum((triangle_g[1]-triangle_g[2]).^2), sum((triangle_g[2]-triangle_g[3]).^2), sum((triangle_g[3]-triangle_g[1]).^2)))
-                intersection=intersectTwoTriangles(triangle_f, triangle_g)
+        algo = MarchingModeIsCubes ? MarchingCubes(; iso=0) : MarchingTetrahedra(; iso=0)
+        ξx=xlims[1]:(xlims[2]-xlims[1])/samples[1]:xlims[2]
+        ξy=ylims[1]:(ylims[2]-ylims[1])/samples[2]:ylims[2]
+        ξz=zlims[1]:(zlims[2]-zlims[1])/samples[3]:zlims[2]
+        f_values = [f([x,y,z]) for x in ξx, y in ξy, z in ξz]
+        f_vertices, f_facets = isosurface(f_values, algo, ξx, ξy, ξz)
+        g_values = [g([x,y,z]) for x in ξx, y in ξy, z in ξz]
+        g_vertices, g_facets = isosurface(g_values, algo, ξx, ξy, ξz)
+
+        for triangle_f in f_facets, triangle_g in g_facets
+            vertices_for_f = [collect(f_vertices[tri]) for tri in triangle_f]
+            vertices_for_g = [collect(g_vertices[tri]) for tri in triangle_g]
+            if (min(sum((vertices_for_f[1]-vertices_for_g[1]).^2), sum((vertices_for_f[2]-vertices_for_g[2]).^2), sum((vertices_for_f[3]-vertices_for_g[3]).^2))
+                    < max(sum((vertices_for_f[1]-vertices_for_f[2]).^2), sum((vertices_for_f[2]-vertices_for_f[3]).^2), sum((vertices_for_f[3]-vertices_for_f[1]).^2), sum((vertices_for_g[1]-vertices_for_g[2]).^2), sum((vertices_for_g[2]-vertices_for_g[3]).^2), sum((vertices_for_g[3]-vertices_for_g[1]).^2)))
+                intersection=triangle_intersection(vertices_for_f, vertices_for_g)
                 if(length(intersection)>=2) && (cutoffmap==nothing || cutoffmap(intersection[1]) && cutoffmap(intersection[2]))
                     push!(lines, [Point3f(intersection[1]), Point3f(intersection[2])])
                 end
@@ -277,19 +295,10 @@ function plot_implicit_curve!(
     end
 
 
-    if WGLMode
-        # 3*linewidth, as the lines seem to be drawn way thinner than in GLMakie
-        try
-            foreach(line->WGLMakiePlottingLibrary.linesegments!(ax, line; transparency=transparency, color=color, linewidth=3*linewidth, kwargs...), lines)
-        catch e
-            println("No curve in WebGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
-        end
-    else
-        try
-            foreach(line->linesegments!(ax, line; color=color, transparency=transparency, linewidth=linewidth, kwargs...), lines)
-        catch e
-            println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
-        end
+    try
+        foreach(line->linesegments!(ax, line; color=color, transparency=transparency, linewidth=linewidth, kwargs...), lines)
+    catch e
+        println("No curve in OpenGL-Mode detected! Check for the relative generality of the implicit surfaces! Error code: $(e)")
     end
 end
 
@@ -312,35 +321,16 @@ function plot_implicit_curve(
     aspect=(1.,1.,1.),
     fontsize=17,
     show_axis=true,
-    in_line=false,
-    WGLMode=false,
     kwargs...
 )
-    if WGLMode
-        WGLMakiePlottingLibrary.activate!()
-        WGLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        global fig = WGLMakiePlottingLibrary.Scene(resolution=resolution, camera=WGLMakiePlottingLibrary.cam3d!, show_axis=show_axis)
-        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
-    else
-        GLMakiePlottingLibrary.activate!()
-        #GLMakiePlottingLibrary.AbstractPlotting.inline!(in_line)
-        global fig = GLMakiePlottingLibrary.Figure(size=resolution)
-        ax = LScene(fig[1, 1], scenekw = (aspect = aspect, xlabelsize=fontsize, ylabelsize=fontsize, zlabelsize=fontsize, limits=Rect(Vec(xlims[1],ylims[1],zlims[1]),Vec(-xlims[1]+xlims[2], -ylims[1]+ylims[2], -zlims[1]+zlims[2]))), show_axis=show_axis)
+    global fig = Figure(size=resolution)
+    ax = Axis3(fig[1,1], aspect=aspect)
+    if !show_axis
+        hidedecorations!(ax)
+        hidespines!(ax)
     end
-    plot_implicit_curve!(ax, f, g; xlims=xlims, ylims=ylims, zlims=zlims, WGLMode=WGLMode, kwargs...)
-    return(fig)
-end
-
-"""
-Calculates the intersection of two TriangleFaces.
-"""
-function intersectTwoTriangles(triangle1, triangle2)
-    points1 = [[point[1],point[2],point[3]] for point in triangle1]
-    points2 = [[point[1],point[2],point[3]] for point in triangle2]
-    polyhedron1 = polyhedron(vrep(points1))
-    polyhedron2 = polyhedron(vrep(points2))
-    intersection = intersect(polyhedron1, polyhedron2)
-    return(vrep(intersection).points.points)
+    plot_implicit_curve!(ax, f, g; xlims=xlims, ylims=ylims, zlims=zlims, kwargs...)
+    return fig
 end
 
 """
@@ -370,6 +360,306 @@ function newtoncorrect(equations, variables, jac, point; tol = 1e-14)
 		end
 	end
 	return q
+end
+
+"""
+Compute the plane in which the `triangle` lies.
+"""
+function plane(triangle)
+    n = cross(triangle[2] - triangle[1], triangle[3] - triangle[1])
+    n /= norm(n)
+    d = -dot(n, triangle[1])
+    return n, d
+end
+
+signed_distance(n, d, p) = dot(n, p) + d
+
+"""
+Intersect a triangle with a plane.
+"""
+function triangle_plane_intersection(triangle, n, d)
+
+    dist = [signed_distance(n,d,v) for v in triangle]
+
+    # Snap tiny distances
+    dist = [abs(x) < 1e-14 ? 0.0 : x for x in dist]
+
+    pts = Vector{Vector{Float64}}()
+
+    # vertices on plane
+    for i in 1:3
+        if dist[i] == 0.0
+            push!(pts, triangle[i])
+        end
+    end
+
+    edges = [(1,2),(2,3),(3,1)]
+
+    for (i,j) in edges
+
+        di = dist[i]
+        dj = dist[j]
+
+        if di*dj < 0
+
+            t = di/(di-dj)
+
+            p = triangle[i] + t*(triangle[j]-triangle[i])
+
+            push!(pts,p)
+
+        end
+
+    end
+
+    # remove duplicates
+    uniquepts = Vector{Vector{Float64}}()
+    for p in pts
+        if !any(norm(p-q) < 1e-14 for q in uniquepts)
+            push!(uniquepts,p)
+        end
+    end
+
+    if length(uniquepts)==0
+        return []
+    elseif length(uniquepts)==1
+        return uniquepts
+    else
+        return uniquepts[1:2]
+    end
+end
+
+function overlap_segments(seg1, seg2)
+
+    p1,p2 = seg1
+    q1,q2 = seg2
+
+    dir = p2-p1
+    L = norm(dir)
+
+    if L < 1e-14
+        return []
+    end
+
+    dir /= L
+
+    t1 = 0.0
+    t2 = dot(p2-p1,dir)
+
+    s1 = dot(q1-p1,dir)
+    s2 = dot(q2-p1,dir)
+
+    a,b = sort([t1,t2])
+    c,d = sort([s1,s2])
+
+    lo = max(a,c)
+    hi = min(b,d)
+
+    if hi < lo-1e-14
+        return []
+    elseif abs(hi-lo)<1e-14
+        return [p1 + lo*dir]
+    else
+        return [p1 + lo*dir,
+                p1 + hi*dir]
+    end
+end
+
+
+function project2D(p, axis)
+    if axis == 1
+        return [p[2], p[3]]
+    elseif axis == 2
+        return [p[1], p[3]]
+    else
+        return [p[1], p[2]]
+    end
+end
+
+
+orient(a,b,c) =
+    (b[1]-a[1])*(c[2]-a[2]) -
+    (b[2]-a[2])*(c[1]-a[1])
+
+
+function line_intersection(a,b,c,d)
+
+    r = b-a
+    s = d-c
+
+    denom = r[1]*s[2] - r[2]*s[1]
+
+    abs(denom) < 1e-14 && error("Parallel lines")
+
+    t = ((c[1]-a[1])*s[2] - (c[2]-a[2])*s[1]) / denom
+
+    return a + t*r
+end
+
+
+function clip_edge(poly, A, B)
+    isempty(poly) && return poly
+
+    result = Vector{Vector{Float64}}()
+
+    n = length(poly)
+
+    for i in 1:n
+
+        P = poly[i]
+        Q = poly[mod1(i+1,n)]
+
+        insideP = orient(A,B,P) >= -1e-14
+        insideQ = orient(A,B,Q) >= -1e-14
+
+        if insideP && insideQ
+
+            push!(result,Q)
+
+        elseif insideP && !insideQ
+
+            push!(result,line_intersection(P,Q,A,B))
+
+        elseif !insideP && insideQ
+
+            push!(result,line_intersection(P,Q,A,B))
+            push!(result,Q)
+
+        end
+    end
+
+    return result
+
+end
+
+
+function unique_vertices(poly)
+
+    out = Vector{Vector{Float64}}()
+
+    for p in poly
+        if isempty(out) || norm(p-out[end]) > 1e-14
+            push!(out,p)
+        end
+    end
+
+    if length(out)>1 && norm(out[1]-out[end])<1e-14
+        pop!(out)
+    end
+
+    return out
+
+end
+
+
+function coplanar_triangle_intersection(tri1, tri2, normal)
+    axis = argmax(abs.(normal))
+
+    T1 = [project2D(v,axis) for v in tri1]
+    T2 = [project2D(v,axis) for v in tri2]
+
+    poly = copy(T1)
+
+    # clip against each edge of triangle 2
+    for i in 1:3
+        A = T2[i]
+        B = T2[mod(i,3)+1]
+        poly = clip_edge(poly,A,B)
+        isempty(poly) && return Vector{Vector{Float64}}()
+    end
+
+    poly = unique_vertices(poly)
+
+    # Lift back into 3D.
+    #
+    # Since every output vertex is either
+    #  - an original vertex, or
+    #  - lies on an edge of one triangle,
+    # we reconstruct the missing coordinate
+    # using the plane equation.
+
+    n = normal / norm(normal)
+    d = -dot(n,tri1[1])
+
+    out = Vector{Vector{Float64}}()
+
+    for p in poly
+
+        if axis == 1
+
+            y,z = p
+            x = -(n[2]*y + n[3]*z + d)/n[1]
+            push!(out,[x,y,z])
+
+        elseif axis == 2
+
+            x,z = p
+            y = -(n[1]*x + n[3]*z + d)/n[2]
+            push!(out,[x,y,z])
+
+        else
+
+            x,y = p
+            z = -(n[1]*x + n[2]*y + d)/n[3]
+            push!(out,[x,y,z])
+
+        end
+
+    end
+
+    return out
+
+end
+
+
+function triangle_intersection(triangle1,triangle2)
+    n1,d1 = plane(triangle1)
+    n2,d2 = plane(triangle2)
+
+    # Parallel planes?
+    if norm(cross(n1,n2)) < 1e-14
+
+        # Different planes
+        if abs(dot(n1,triangle2[1])+d1) > 1e-14
+            return []
+        end
+
+        return coplanar_triangle_intersection(triangle1, triangle2, n1)
+    end
+
+    seg1 = triangle_plane_intersection(triangle1,n2,d2)
+    seg2 = triangle_plane_intersection(triangle2,n1,d1)
+
+    if isempty(seg1) || isempty(seg2)
+        return []
+    end
+
+    if length(seg1)==1 && length(seg2)==1
+        if norm(seg1[1]-seg2[1])<1e-14
+            return seg1
+        else
+            return []
+        end
+    elseif length(seg1)==2 && length(seg2)==2
+        return overlap_segments(seg1,seg2)
+    else
+        # point vs segment
+        pt = length(seg1)==1 ? seg1[1] : seg2[1]
+        seg = length(seg1)==2 ? seg1 : seg2
+
+        a,b = seg
+        ab = b-a
+        t = dot(pt-a,ab)/dot(ab,ab)
+
+        proj = a+t*ab
+
+        if norm(proj-pt)<1e-14 &&
+           -1e-14<=t<=1+1e-14
+            return [pt]
+        end
+
+        return []
+    end
 end
 
 
